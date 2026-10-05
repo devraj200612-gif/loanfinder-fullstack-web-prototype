@@ -1,0 +1,24 @@
+{
+  "name": "loanfinder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Loan comparison, P2P lending and branch discovery prototype (static browser app)",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:regression": "playwright test tests/regression.spec.js",
+    "test:map": "playwright test tests/map.spec.js tests/map-pixels.spec.js tests/geo-branch.spec.js",
+    "test:p2p": "playwright test tests/p2p-overflow.spec.js",
+    "report:complete": "node generate_complete_report.js",
+    "report:status": "node generate_report.js"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "pdfmake": "^0.3.11"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

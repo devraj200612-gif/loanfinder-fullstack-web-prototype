@@ -1,0 +1,13 @@
+# Dependencies - restored with `npm install`, never committed.
+node_modules/
+
+# Playwright run artefacts - regenerated on every run.
+test-results/
+playwright-report/
+blob-report/
+.playwright-artifacts*/
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+*.swp

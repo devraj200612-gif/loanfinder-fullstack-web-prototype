@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoanFinder — Modern Loan Comparison & Branch Discovery</title>
+  <!-- Lucide Icons (vendored locally so the app works offline too) -->
+  <script src="vendor/lucide.min.js"></script>
+  <!-- MapLibre GL (Google-Maps-style interface) + Leaflet fallback (both vendored locally) -->
+  <link rel="stylesheet" href="vendor/maplibre-gl.css" />
+  <script src="vendor/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="vendor/leaflet.css" />
+  <script src="vendor/leaflet.js"></script>
+  <!--
+    OPTIONAL: use the real Google Maps SDK instead of the built-in map.
+    1. Google Cloud Console -> create a project -> enable "Maps JavaScript API".
+    2. Credentials -> Create Credentials -> API key.
+    3. IMPORTANT: restrict the key. Since this file is plain HTML, anyone can read
+       the key, so lock it down: Application restrictions -> HTTP referrers
+       (file:// and localhost cannot be restricted, so prefer serving the app over
+       http://localhost for local use), and set a usage quota + billing alert.
+    4. Paste the key below, then app.setMapProvider('google') in the console.
+    Leave this blank to use the keyless OpenFreeMap map that ships working.
+  -->
+  <script>window.LOANFINDER_GOOGLE_MAPS_KEY = '';</script>
+  <!-- pdf-lib: real client-side PDF generation for the document checklist (vendored locally) -->
+  <script src="vendor/pdf-lib.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+  <!-- ==================== PUBLIC LANDING PAGE ==================== -->
+  <div id="landing">
+    <!-- Landing Navbar -->
+    <header class="landing-nav">
+      <div class="landing-nav-inner">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <i data-lucide="percent"></i>
+          </div>
+          <span class="logo-text text-slate-900">Loan<span class="text-blue-600">Finder</span></span>
+        </div>
+        <nav class="landing-nav-links">
+          <a href="#features">Features</a>
+          <a href="#how">How it Works</a>
+          <a href="#stats">Why Us</a>
+        </nav>
+        <div class="landing-nav-actions">
+          <button class="btn btn-primary btn-lg shadow-lg" onclick="app.showAuth()">
+            <i data-lucide="log-in"></i> Sign In
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="landing-hero">
+      <div class="landing-hero-glow"></div>
+      <div class="landing-hero-inner">
+        <span class="hero-badge">HackIndia 2026 Submission</span>
+        <h1>Find Your Best Loan in <span class="text-blue-600">Minutes</span>, Not Days</h1>
+        <p>Compare advertised rates from 5 Indian banks (7 live offers), calculate your exact EMI, check eligibility and locate branches — all from one beautiful dashboard.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg shadow-lg" onclick="app.showAuth()">
+            <i data-lucide="rocket"></i> Start Comparing Free
+          </button>
+          <button class="btn btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'});">
+            <i data-lucide="play-circle"></i> See How It Works
+          </button>
+        </div>
+        <div class="landing-trust">
+          <div class="landing-avatars">
+            <span class="mini-avatar" style="background:#2563eb">S</span>
+            <span class="mini-avatar" style="background:#bd241e">H</span>
+            <span class="mini-avatar" style="background:#97144d">A</span>
+            <span class="mini-avatar" style="background:#ed1c24">K</span>
+          </div>
+          <span>HackIndia 2026 prototype — <strong>sample</strong> data for demonstration</span>
+        </div>
+      </div>
+
+      <!-- Phone mockup -->
+      <div class="landing-mockup">
+        <div class="mockup-card">
+          <div class="mockup-head">
+            <div class="bank-logo-sq">SB</div>
+            <div>
+              <div class="bank-name-large" style="font-size:1rem">State Bank</div>
+              <div class="loan-category-label">Home Loan</div>
+            </div>
+            <span class="tag-pill tag-pill-success">Best Offer</span>
+          </div>
+          <div class="mockup-rate">
+            <div class="rate-val text-emerald-600" style="font-size:1.6rem">7.85% <span style="font-size:.75rem">p.a.</span></div>
+            <div class="rate-label">Estimated EMI</div>
+            <div class="mockup-emi">₹27,704 <span class="text-slate-400">/mo</span></div>
+          </div>
+          <div class="mockup-bar"><div class="mockup-bar-fill"></div></div>
+          <div class="mockup-footer">
+            <button class="btn btn-primary btn-sm flex-1">Apply Now</button>
+            <button class="btn btn-secondary btn-sm">Compare</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats band -->
+    <section class="landing-stats" id="stats">
+      <div class="stat-box light">
+        <div class="stat-number text-slate-900">7.85%</div>
+        <div class="stat-label text-slate-500">Starting Rate</div>
+      </div>
+      <div class="stat-box light">
+        <div class="stat-number text-slate-900">5</div>
+        <div class="stat-label text-slate-500">Banks Covered</div>
+      </div>
+      <div class="stat-box light">
+        <div class="stat-number text-slate-900">7</div>
+        <div class="stat-label text-slate-500">Live Offers</div>
+      </div>
+      <div class="stat-box light">
+        <div class="stat-number text-slate-900">5</div>
+        <div class="stat-label text-slate-500">Cities</div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="landing-section" id="features">
+      <div class="landing-section-head">
+        <h2>Everything You Need to Choose Smartly</h2>
+        <p class="section-subtitle">A complete toolkit for comparing and applying for loans without the confusion.</p>
+      </div>
+      <div class="landing-features-grid">
+        <div class="landing-feature-card">
+          <div class="feature-icon bg-blue-50 text-blue-600"><i data-lucide="arrow-left-right"></i></div>
+          <h3>Side-by-Side Comparison</h3>
+          <p>Rank every offer by lowest rate, EMI, or processing fee in real time.</p>
+        </div>
+        <div class="landing-feature-card">
+          <div class="feature-icon bg-emerald-50 text-emerald-600"><i data-lucide="calculator"></i></div>
+          <h3>Instant EMI Calculator</h3>
+          <p>Dynamic EMI outputs update the moment you move the amount or tenure slider.</p>
+        </div>
+        <div class="landing-feature-card">
+          <div class="feature-icon bg-indigo-50 text-indigo-600"><i data-lucide="map-pin"></i></div>
+          <h3>Branch Locator Map</h3>
+          <p>Find official bank branches near you on a Google-Maps-style map with smooth zoom, rotate and a satellite view.</p>
+        </div>
+        <div class="landing-feature-card">
+          <div class="feature-icon bg-amber-50 text-amber-600"><i data-lucide="file-check-2"></i></div>
+          <h3>Document Readiness</h3>
+          <p>A smart checklist that tracks which documents you have ready to apply.</p>
+        </div>
+        <div class="landing-feature-card">
+          <div class="feature-icon bg-pink-50 text-pink-600"><i data-lucide="bookmark"></i></div>
+          <h3>Save & Follow Up</h3>
+          <p>Bookmark promising offers and compare them later in one place.</p>
+        </div>
+        <div class="landing-feature-card">
+          <div class="feature-icon bg-sky-50 text-sky-600"><i data-lucide="shield-check"></i></div>
+          <h3>Your Data Stays Local</h3>
+          <p>This demo keeps your loan details in your browser and asks for no real credentials. Only the branch map contacts a server, to load public OpenStreetMap tiles.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="landing-section landing-alt" id="how">
+      <div class="landing-section-head">
+        <h2>How It Works</h2>
+        <p class="section-subtitle">Three simple steps from browsing to applying.</p>
+      </div>
+      <div class="landing-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Set Your Requirements</h3>
+          <p>Select loan types, amount, tenure, income and credit profile.</p>
+        </div>
+        <div class="step-arrow"><i data-lucide="arrow-right"></i></div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Compare Top Offers</h3>
+          <p>Review rates, EMIs and fees ranked from lowest to highest.</p>
+        </div>
+        <div class="step-arrow"><i data-lucide="arrow-right"></i></div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Apply Confidently</h3>
+          <p>Check eligibility, find a branch and follow the document checklist.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="landing-cta">
+      <h2>Ready to Find Your Best Rate?</h2>
+      <p>Join thousands of smart borrowers making confident loan decisions.</p>
+      <button class="btn btn-primary btn-lg shadow-lg" onclick="app.showAuth()">
+        <i data-lucide="log-in"></i> Sign In to Start Comparing
+      </button>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="logo-container">
+        <div class="logo-icon"><i data-lucide="percent"></i></div>
+        <span class="logo-text text-slate-900">Loan<span class="text-blue-600">Finder</span></span>
+      </div>
+      <p>Made with care for HackIndia 2026. Rates shown are illustrative and may vary by lender.</p>
+      <div class="landing-footer-links">
+        <a href="#" onclick="app.showAuth()">Sign In</a>
+        <a href="#features">Features</a>
+        <a href="#how">How It Works</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== APP CONTAINER ==================== -->
+  <div id="app" class="flex h-screen overflow-hidden hidden">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="sidebar">
+      <!-- Brand Logo -->
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <i data-lucide="percent"></i>
+          </div>
+          <span class="logo-text">Loan<span class="text-blue-400">Finder</span></span>
+        </div>
+      </div>
+
+      <!-- Nav Links -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">MAIN MENU</div>
+        <button class="nav-item active" data-view="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="eligibility">
+          <i data-lucide="shield-check"></i>
+          <span>Loan Eligibility</span>
+        </button>
+        <button class="nav-item" data-view="saved">
+          <i data-lucide="bookmark"></i>
+          <span>Saved</span>
+        </button>
+        <button class="nav-item" data-view="p2p">
+          <i data-lucide="hand-coins"></i>
+          <span>P2P Lending</span>
+          <span class="badge-count" id="p2p-open-badge">7</span>
+        </button>
+        <div class="nav-subgroup">
+          <button class="nav-item nav-subitem" data-view="p2p-borrow" title="Borrow Money on the P2P marketplace">
+            <span class="nav-subitem-dot"></span>
+            <span>Borrow Money</span>
+          </button>
+          <button class="nav-item nav-subitem" data-view="p2p-lend" title="Lend Money on the P2P marketplace">
+            <span class="nav-subitem-dot"></span>
+            <span>Lend Money</span>
+          </button>
+        </div>
+
+        <div class="nav-section-label mt-6">ACCOUNT</div>
+        <button class="nav-item" data-view="profile">
+          <i data-lucide="user"></i>
+          <span>Profile</span>
+        </button>
+        <button class="nav-item" data-view="settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <!-- User Mini Profile & Logout -->
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="avatar">AJ</div>
+          <div class="user-meta">
+            <div class="user-name">Alex Johnson</div>
+            <div class="user-email">alex.j@example.com</div>
+          </div>
+        </div>
+        <button class="logout-btn" id="logout-btn" title="Log Out">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-viewport">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" class="sidebar-toggle-btn" aria-label="Toggle sidebar">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="global-search" aria-label="Search banks, loan types, or rates" placeholder="Search banks, loan types, or rates..." />
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-action-btn" title="Notifications">
+            <i data-lucide="bell"></i>
+            <span class="notification-dot"></span>
+          </button>
+          <div class="topbar-user">
+            <div class="topbar-avatar">AJ</div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name">Alex Johnson</span>
+              <span class="topbar-user-sub">Loan Explorer</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- SCROLLABLE BODY VIEW -->
+      <div id="content-scroll" class="content-scroll">
+
+        <!-- ==================== VIEW 1: DASHBOARD ==================== -->
+        <section id="view-dashboard" class="view-panel active">
+          <!-- Hero Welcome Banner -->
+          <div class="hero-card">
+            <div class="hero-text">
+              <div class="hero-badge">Transparent Comparison</div>
+              <h1>Find the Best Loan for Your Needs</h1>
+              <p>Compare advertised rates from 5 banks (7 live offers), calculate your monthly EMI, and track branches right in your city.</p>
+              <div class="hero-actions">
+                <button class="btn btn-primary shadow-lg" onclick="app.navigateTo('compare')">
+                  <i data-lucide="sparkles"></i> Compare Best Offers
+                </button>
+                <button class="btn btn-secondary" onclick="app.scrollToSection('requirements-section')">
+                  <i data-lucide="sliders"></i> Customize Requirements
+                </button>
+              </div>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-box">
+                <div class="stat-number">7.85%</div>
+                <div class="stat-label">Starting Interest Rate</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Banks Covered</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Live Offers</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Choose Loan Type(s) -->
+          <div class="content-section">
+            <div class="section-header">
+              <div>
+                <h2>Choose a Loan Type</h2>
+                <p class="section-subtitle">Select one loan category to compare offers, rates, and eligibility across leading banks.</p>
+              </div>
+              <div class="selection-status">
+                <span id="selected-loans-count">1</span> loan type selected
+              </div>
+            </div>
+
+            <!-- Multi-Select Option Grid -->
+            <div class="loan-cards-grid" id="loan-types-grid">
+              <!-- Cards rendered dynamically via JS -->
+            </div>
+          </div>
+
+          <!-- Section: Loan Requirements Input -->
+          <div class="content-section" id="requirements-section">
+            <div class="card requirements-card">
+              <div class="card-header border-b">
+                <div class="card-title">
+                  <i data-lucide="sliders-horizontal" class="text-blue-600"></i>
+                  <h3>Your Loan Requirements & Criteria</h3>
+                </div>
+                <span class="text-xs text-slate-500 font-medium">Advertised rates from our catalogue</span>
+              </div>
+              
+              <div class="card-body">
+                <div class="form-grid">
+                  <!-- Loan Amount Slider -->
+                  <div class="form-group col-span-2">
+                    <div class="flex-between mb-2">
+                      <label for="loan-amount-range">Required Loan Amount</label>
+                      <span class="amount-badge font-bold" id="loan-amount-display">₹35,00,000</span>
+                    </div>
+                    <input type="range" id="loan-amount-range" min="100000" max="15000000" step="50000" value="3500000" class="custom-range" />
+                    <div class="range-scale">
+                      <span>₹1 Lakh</span>
+                      <span>₹50 Lakh</span>
+                      <span>₹1 Crore</span>
+                      <span>₹1.5 Crore</span>
+                    </div>
+                  </div>
+
+                  <!-- Desired Tenure -->
+                  <div class="form-group">
+                    <label for="loan-tenure">Desired Loan Tenure</label>
+                    <select id="loan-tenure" class="form-select">
+                      <option value="5">5 Years (60 Months)</option>
+                      <option value="10">10 Years (120 Months)</option>
+                      <option value="15">15 Years (180 Months)</option>
+                      <option value="20" selected>20 Years (240 Months)</option>
+                      <option value="25">25 Years (300 Months)</option>
+                      <option value="30">30 Years (360 Months)</option>
+                    </select>
+                  </div>
+
+                  <!-- Monthly/Annual Income -->
+                  <div class="form-group">
+                    <label for="annual-income">Annual Income</label>
+                    <div class="input-icon-wrapper">
+                      <span class="input-prefix">₹</span>
+                      <input type="number" id="annual-income" class="form-input with-prefix" value="950000" placeholder="e.g. 9,50,000" />
+                    </div>
+                  </div>
+
+                  <!-- Employment Type -->
+                  <div class="form-group">
+                    <label for="employment-type">Employment Type</label>
+                    <select id="employment-type" class="form-select">
+                      <option value="salaried" selected>Salaried (Corporate / Govt)</option>
+                      <option value="self-employed-professional">Self-Employed Professional (Doctor, CA, Architect)</option>
+                      <option value="business-owner">Business Owner / Entrepreneur</option>
+                    </select>
+                  </div>
+
+                  <!-- Credit Score -->
+                  <div class="form-group">
+                    <label for="credit-score">Estimated Credit Score (CIBIL/Experian)</label>
+                    <select id="credit-score" class="form-select">
+                      <option value="780" selected>Excellent (750 - 900) - Best Rates</option>
+                      <option value="720">Good (700 - 749)</option>
+                      <option value="660">Average (650 - 699)</option>
+                      <option value="600">Needs Attention (&lt; 650)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="form-footer mt-6 flex justify-end gap-3">
+                  <button class="btn btn-secondary" id="reset-filters-btn" onclick="app.resetFilters()">
+                    <i data-lucide="rotate-ccw"></i> Reset
+                  </button>
+                  <button class="btn btn-primary" id="apply-filters-btn" onclick="app.findBestMatches()">
+                    <i data-lucide="sparkles"></i> Find Matching Loan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Featured Best Rate Preview -->
+          <div class="content-section" id="quick-compare-preview">
+            <div class="section-header">
+              <div>
+                <h2>Top 3 Recommended Banks for You</h2>
+                <p class="section-subtitle">Ranked by how well your income, credit score, employment and loan requirements fit each bank's eligibility criteria.</p>
+              </div>
+              <button class="btn-link" id="toggle-comparison-btn" onclick="app.toggleFullComparison()">View All Comparison &darr;</button>
+            </div>
+            <div id="hero-best-offer-container" class="recommend-grid">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+        <!-- All Offers (Full Comparison) -->
+        <section class="content-section mt-8" id="all-offers-section">
+          <div class="section-header">
+            <div>
+              <div class="flex items-center gap-3">
+                <h2>All Bank Offers — Full Comparison</h2>
+                <span class="tag-pill tag-pill-success">
+                  <i data-lucide="arrow-down-narrow-wide" class="w-3.5 h-3.5"></i>
+                  Sorted by Lowest Interest Rate
+                </span>
+              </div>
+                <p class="section-subtitle">Review side-by-side advertised rates, EMI calculations, and processing charges across the banks in our catalogue.</p>
+            </div>
+            <div class="flex gap-2 items-center">
+              <select id="sort-results" class="form-select text-sm py-1.5" aria-label="Sort offers" onchange="app.handleSortChange(this.value)">
+                <option value="rate-asc">Lowest Interest Rate first</option>
+                <option value="emi-asc">Lowest Monthly EMI</option>
+                <option value="fee-asc">Lowest Processing Fee</option>
+                <option value="amount-desc">Highest Loan Amount</option>
+              </select>
+              <button class="btn btn-outline" id="view-all-btn" onclick="app.toggleFullComparison()">
+                <i data-lucide="chevron-down"></i> View All Comparison
+              </button>
+            </div>
+          </div>
+
+          <div id="full-comparison-wrap" class="hidden">
+            <!-- Pinned Best Offer Card -->
+            <div id="best-offer-hero" class="mb-6">
+              <!-- Best offer injected here -->
+            </div>
+
+            <!-- Comparison Table / Grid of Other Banks -->
+            <h3 class="text-base font-semibold text-slate-800 mb-3">All Bank Offers (Ranked by Rate)</h3>
+            <div class="comparison-grid" id="comparison-list-container">
+              <!-- Dynamically injected -->
+            </div>
+
+            <!-- Regulatory Disclaimer Banner -->
+            <div class="disclaimer-banner mt-6">
+              <i data-lucide="info" class="disclaimer-icon"></i>
+              <div class="disclaimer-text">
+                <strong>Notice:</strong> Interest rates shown are advertised starting rates and actual rates may vary based on applicant eligibility, credit profile, loan amount, and bank discretion. Terms and conditions apply.
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+        <!-- ==================== VIEW 3: BANK DETAILS & DOCUMENTS ==================== -->
+        <section id="view-documents" class="view-panel">
+          <!-- Back toolbar: return to offers list or switch to another bank -->
+          <div class="flex-between mb-4 flex-wrap gap-3">
+            <button class="btn btn-outline btn-sm" onclick="app.backToOffers()">
+              <i data-lucide="arrow-left"></i> Back to All Offers
+            </button>
+            <select class="form-select text-sm py-1.5" id="bank-detail-switch" onchange="app.switchBankDetails(this.value)" aria-label="Browse another bank">
+              <option value="">Browse another bank...</option>
+            </select>
+          </div>
+
+          <!-- Active Bank Header Card -->
+          <div class="card bank-detail-header-card mb-6" id="bank-detail-header">
+            <div class="bank-identity">
+              <div class="bank-avatar-lg" id="detail-bank-logo">SB</div>
+              <div>
+                <div class="flex items-center gap-3">
+                  <h2 id="detail-bank-name">State Bank</h2>
+                  <span class="badge-featured" id="detail-bank-tag">Lowest Rate Choice</span>
+                </div>
+                <p class="text-slate-500 text-sm" id="detail-loan-category">Home Loan &bull; Regular Floating Scheme</p>
+              </div>
+            </div>
+            <div class="bank-key-metrics">
+              <div class="metric">
+                <span class="label">Interest Rate</span>
+                <span class="val text-emerald-600" id="detail-rate">7.85% p.a.</span>
+              </div>
+              <div class="metric">
+                <span class="label">Processing Fee</span>
+                <span class="val" id="detail-fee">0.25%</span>
+              </div>
+              <div class="metric">
+                <span class="label">Max Tenure</span>
+                <span class="val" id="detail-tenure">30 Years</span>
+              </div>
+              <div class="metric">
+                <span class="label">Max Limit</span>
+                <span class="val" id="detail-amount">₹1.50 Cr</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs (Overview, Documents, Eligibility, Branches) -->
+          <div class="tabs-container mb-6">
+            <div class="tabs-list">
+              <button class="tab-btn" data-tab="tab-overview">Overview</button>
+              <button class="tab-btn active" data-tab="tab-docs">Documents</button>
+              <button class="tab-btn" data-tab="tab-eligibility">Eligibility Criteria</button>
+              <button class="tab-btn" data-tab="tab-hidden-charges">Hidden Charges</button>
+              <button class="tab-btn" data-tab="tab-branches" onclick="app.viewBranchesForCurrentBank()">Branches</button>
+            </div>
+          </div>
+
+          <!-- Tab Content: Documents Checklist -->
+          <div id="tab-docs" class="tab-content active">
+            <div class="card p-6">
+              <div class="flex-between mb-4 flex-wrap gap-3">
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">Typical Documents Required</h3>
+                  <p class="text-xs text-slate-500">Requirements may vary depending on employment status and loan category.</p>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn btn-secondary btn-sm" onclick="app.downloadDocChecklist()" id="download-checklist-btn">
+                    <i data-lucide="download"></i> Download Checklist (PDF)
+                  </button>
+                  <button class="btn btn-outline btn-sm" onclick="toast('Document upload portal is ready for backend integration!')">
+                    <i data-lucide="upload-cloud"></i> Upload Manually
+                  </button>
+                </div>
+              </div>
+
+              <!-- DigiLocker Integration Banner -->
+              <div class="digilocker-banner" id="digilocker-banner">
+                <div class="digilocker-banner-inner">
+                  <div class="digilocker-banner-icon">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                  </div>
+                  <div class="digilocker-banner-text">
+                    <h4 class="font-bold text-slate-900">Import from DigiLocker</h4>
+                    <p class="text-xs text-slate-500">Import your government-issued documents (Aadhaar, PAN, Driving License & more) directly from DigiLocker in this demo.</p>
+                  </div>
+                  <button class="btn btn-digilocker btn-sm" id="digilocker-connect-btn" onclick="app.connectDigiLocker()">
+                    <svg class="digilocker-logo-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"><rect width="24" height="24" rx="4" fill="#00356B"/><path d="M6 8.5C6 7.67 6.67 7 7.5 7h9c.83 0 1.5.67 1.5 1.5v7c0 .83-.67 1.5-1.5 1.5h-9C6.67 17 6 16.33 6 15.5v-7zM8 10h8v1H8v-1zm0 3h6v1H8v-1z" fill="#fff"/></svg>
+                    Connect DigiLocker
+                  </button>
+                </div>
+              </div>
+
+              <!-- DigiLocker Connected Status -->
+              <div class="digilocker-status" id="digilocker-status" style="display:none;">
+                <div class="digilocker-status-inner">
+                  <div class="digilocker-status-left">
+                    <div class="digilocker-status-icon connected">
+                      <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <span class="font-semibold text-sm text-slate-900">DigiLocker Connected</span>
+                      <span class="text-xs text-slate-500 ml-2" id="digilocker-doc-count"></span>
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="btn btn-outline btn-sm" onclick="app.fetchDigiLockerDocs()">
+                      <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                    </button>
+                    <button class="btn btn-outline btn-sm text-red-500" onclick="app.disconnectDigiLocker()">
+                      <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Disconnect
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Checklist items categorized -->
+              <div class="document-checklist-wrapper" id="doc-checklist-container">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Overview -->
+          <div id="tab-overview" class="tab-content">
+            <div class="card p-6">
+              <h3 class="text-lg font-bold mb-3">Product Overview & Charges</h3>
+              <p class="text-slate-600 mb-4" id="detail-overview-summary">-</p>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <h4 class="font-semibold text-slate-800 text-sm mb-1">Pre-payment / Foreclosure Charges</h4>
+                  <p class="text-xs text-slate-600" id="detail-foreclosure">-</p>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <h4 class="font-semibold text-slate-800 text-sm mb-1">Processing Fee</h4>
+                  <p class="text-xs text-slate-600" id="detail-processing-fee">-</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Eligibility -->
+          <div id="tab-eligibility" class="tab-content">
+            <div class="card p-6">
+              <h3 class="text-lg font-bold mb-3">Eligibility Guidelines</h3>
+              <p class="text-xs text-slate-500 mb-3" id="detail-eligibility-source">-</p>
+              <ul class="eligibility-list" id="detail-eligibility-list">
+                <li><i data-lucide="info" class="text-slate-400"></i> Loading eligibility for the selected offer...</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Tab Content: Hidden Charges -->
+          <div id="tab-hidden-charges" class="tab-content">
+            <div class="card p-6">
+              <div class="flex-between mb-4 flex-wrap gap-3">
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">Hidden Charges &amp; Fine Print</h3>
+                  <p class="text-xs text-slate-500">Fees and penalties beyond the advertised interest rate - so there are no surprises after sanction.</p>
+                </div>
+                <span class="tag-pill">
+                  <i data-lucide="eye-off" class="w-3.5 h-3.5"></i> Read before you commit
+                </span>
+              </div>
+              <div id="hidden-charges-items">
+                <!-- Injected via JS -->
+              </div>
+              <div id="hidden-charges-summary">
+                <!-- Summary / estimated total injected via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 4: BANK BRANCH LOCATOR ==================== -->
+        <section id="view-branches" class="view-panel">
+          <!-- Back toolbar: return to the Bank Details & Docs page -->
+          <div class="flex-between mb-4 flex-wrap gap-3">
+            <button class="btn btn-outline btn-sm" onclick="app.backToBankDetails()">
+              <i data-lucide="arrow-left"></i> Back to Bank Details
+            </button>
+          </div>
+          <div class="section-header">
+            <div>
+              <h2>Bank Branch Locator</h2>
+              <p class="section-subtitle">Locate official branches of your chosen lender in your city to submit physical documents or meet a loan officer.</p>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="locator-controls card p-4 mb-4">
+            <div class="controls-row">
+              <!-- Bank Filter -->
+              <div class="control-group">
+                <label for="branch-bank-select">Selected Bank</label>
+                <select id="branch-bank-select" class="form-select" onchange="app.handleBranchFilter()">
+                  <option value="State Bank">State Bank</option>
+                  <option value="HDFC Bank">HDFC Bank</option>
+                  <option value="ICICI Bank">ICICI Bank</option>
+                  <option value="Axis Bank">Axis Bank</option>
+                  <option value="Kotak Mahindra">Kotak Mahindra</option>
+                </select>
+              </div>
+
+              <!-- City Selector -->
+              <div class="control-group">
+                <label for="branch-city-select">Select City</label>
+                <select id="branch-city-select" class="form-select" onchange="app.handleBranchFilter()">
+                  <option value="Mumbai" selected>Mumbai</option>
+                  <option value="Delhi">Delhi / NCR</option>
+                  <option value="Bengaluru">Bengaluru</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                  <option value="Pune">Pune</option>
+                </select>
+              </div>
+
+              <!-- Search Input -->
+              <div class="control-group flex-1">
+                <label for="branch-search-input">Search Area or Street</label>
+                <div class="input-icon-wrapper">
+                  <i data-lucide="search" class="input-icon"></i>
+                  <input type="text" id="branch-search-input" class="form-input with-icon" placeholder="e.g. Bandra, Connaught Place, Koramangala..." oninput="app.handleBranchSearch(this.value)" />
+                </div>
+              </div>
+
+              <!-- GPS Button -->
+              <div class="control-group flex items-end">
+                <button class="btn btn-secondary w-full" onclick="app.useCurrentLocation()">
+                  <i data-lucide="crosshair"></i> Current Location
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split Screen: Branch Cards & Map View -->
+          <div class="branch-layout">
+            <!-- Left: Scrollable Branch List -->
+            <div class="branch-list-pane">
+              <div class="branch-pane-header">
+                <span class="font-bold text-slate-800" id="branch-results-count">5 branches found</span>
+                <span class="text-xs text-slate-500" id="branch-sort-label">Sorted by city</span>
+              </div>
+              <div class="branch-cards-list" id="branch-cards-container">
+                <!-- Cards injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Right: Interactive Map -->
+            <div class="branch-map-pane">
+              <div id="map-element" class="h-full w-full rounded-xl"></div>
+              <!-- Google-Maps-style layer switcher: street map / satellite -->
+              <div class="map-layer-switch" role="group" aria-label="Map type">
+                <button type="button" class="map-layer-btn active" data-map-style="street"
+                        aria-pressed="true" onclick="app.setMapStyle('street')">
+                  <i data-lucide="map"></i> Map
+                </button>
+                <button type="button" class="map-layer-btn" data-map-style="satellite"
+                        aria-pressed="false" onclick="app.setMapStyle('satellite')">
+                  <i data-lucide="layers"></i> Satellite
+                </button>
+              </div>
+              <!-- Re-frame every visible branch (Google-Maps-style) -->
+              <button type="button" class="map-fit-btn" id="map-fit-btn"
+                      aria-label="Fit all branches on screen" onclick="app.fitAllBranches()">
+                <i data-lucide="maximize"></i>
+              </button>
+              <!-- Shown only when the map tile/style server cannot be reached -->
+              <div id="map-offline-notice" class="map-offline-notice hidden" role="status" aria-live="polite">
+                <i data-lucide="wifi-off" class="w-7 h-7 mx-auto mb-2 text-slate-400"></i>
+                <p class="text-sm font-semibold text-slate-700 text-center">Map background unavailable</p>
+                <p class="text-xs text-slate-500 text-center mt-1 px-4">
+                  Street map tiles are loaded from openfreemap.org (satellite imagery from Esri), so this map needs an
+                  internet connection. The branch list, IFSC codes and directions links below work without one.
+                </p>
+                <button class="btn btn-secondary btn-sm mt-3" onclick="app.retryMapTiles()">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Retry map
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 5: SAVED RESULTS ==================== -->
+        <section id="view-saved" class="view-panel">
+          <div class="section-header">
+            <div>
+              <h2>Saved</h2>
+              <p class="section-subtitle">Access your bookmarked bank offers and P2P lending requests.</p>
+            </div>
+          </div>
+
+          <div class="lend-tabs mb-6">
+            <button class="lend-tab-btn active" data-saved-tab="saved-bank-tab" onclick="app.switchSavedTab('saved-bank-tab')">
+              <i data-lucide="building-2" class="w-4 h-4"></i> Bank Offers
+            </button>
+            <button class="lend-tab-btn" data-saved-tab="saved-p2p-tab" onclick="app.switchSavedTab('saved-p2p-tab')">
+              <i data-lucide="hand-coins" class="w-4 h-4"></i> P2P Requests
+            </button>
+          </div>
+
+          <!-- Tab: Saved Bank Offers -->
+          <div class="saved-tab-content active" id="saved-bank-tab">
+            <div id="saved-cards-container" class="comparison-grid">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+
+          <!-- Tab: Saved P2P Requests -->
+          <div class="saved-tab-content" id="saved-p2p-tab">
+            <div id="saved-p2p-container" class="comparison-grid">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 6: USER PROFILE ==================== -->
+        <section id="view-profile" class="view-panel">
+          <div class="section-header">
+            <div>
+              <h2>User Profile & Loan Preferences</h2>
+              <p class="section-subtitle">Manage your personal details, pre-filled employment profile, and saved documents.</p>
+            </div>
+          </div>
+          <div class="profile-grid">
+            <div class="card p-6">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="avatar-xl">AJ</div>
+                <div>
+                  <h3 class="text-xl font-bold">Alex Johnson</h3>
+                  <p class="text-slate-500 text-sm">Member since March 2026 &bull; Verified Borrower</p>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="profile-full-name">Full Name</label>
+                  <input type="text" class="form-input" id="profile-full-name" value="Alex Johnson" />
+                </div>
+                <div class="form-group">
+                  <label for="profile-email">Email Address</label>
+                  <input type="email" class="form-input" id="profile-email" value="alex.j@example.com" />
+                </div>
+                <div class="form-group">
+                  <label for="profile-phone">Primary Phone</label>
+                  <input type="tel" class="form-input" id="profile-phone" value="+91 98765 43210" />
+                </div>
+                <div class="form-group">
+                  <label for="profile-city">Primary City</label>
+                  <input type="text" class="form-input" id="profile-city" value="Mumbai" />
+                </div>
+              </div>
+              <button class="btn btn-primary mt-6" onclick="toast('Profile updated successfully!')">Update Profile</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 6: ELIGIBILITY ==================== -->
+        <section id="view-eligibility" class="view-panel">
+          <div class="section-header">
+            <div>
+              <h2>Loan Eligibility Checker</h2>
+              <p class="section-subtitle">Tune your financial profile and watch how much a bank would approve — instantly.</p>
+            </div>
+            <button class="btn btn-primary" onclick="app.launchEligibility()">
+              <i data-lucide="refresh-cw"></i> Sync from Dashboard
+            </button>
+          </div>
+
+          <!-- Live profile controls -->
+          <div class="card p-6 mb-4">
+            <div class="flex-between mb-4 flex-wrap gap-3">
+              <h3 class="font-bold text-slate-900">Your Financial Profile</h3>
+              <span class="text-xs text-slate-500">Adjust any control — results update instantly</span>
+            </div>
+            <div class="elig-controls-row">
+              <div class="elig-ctrl">
+                <div class="flex-between">
+                  <label for="elig-income-range">Annual Income</label>
+                  <span class="text-xs text-slate-400">₹3L – ₹50L</span>
+                </div>
+                <input type="range" id="elig-income-range" class="custom-range" min="300000" max="5000000" step="50000" value="950000" oninput="app.syncEligRange(this)" />
+                <input type="number" id="elig-income-num" class="form-input" aria-label="Annual Income (exact amount)" value="950000" oninput="app.syncEligNum(this)" />
+              </div>
+              <div class="elig-ctrl">
+                <div class="flex-between">
+                  <label for="elig-emi-range">Existing Monthly EMIs</label>
+                  <span class="text-xs text-slate-400">₹0 – ₹1L</span>
+                </div>
+                <input type="range" id="elig-emi-range" class="custom-range" min="0" max="100000" step="5000" value="0" oninput="app.syncEligRange(this)" />
+                <input type="number" id="elig-emi-num" class="form-input" aria-label="Existing Monthly EMIs (exact amount)" value="0" oninput="app.syncEligNum(this)" />
+              </div>
+              <div class="elig-ctrl">
+                <div class="flex-between">
+                  <label for="elig-credit-range">Credit Score</label>
+                  <span class="text-xs text-slate-400">550 – 850</span>
+                </div>
+                <input type="range" id="elig-credit-range" class="custom-range" min="550" max="850" step="10" value="780" oninput="app.syncEligRange(this)" />
+                <input type="number" id="elig-credit-num" class="form-input" aria-label="Credit Score (exact value)" value="780" oninput="app.syncEligNum(this)" />
+              </div>
+              <div class="elig-ctrl">
+                <label for="elig-employment">Employment Type</label>
+                <select id="elig-employment" class="form-select" onchange="app.recalcEligibility()">
+                  <option value="salaried" selected>Salaried (Corporate / Govt)</option>
+                  <option value="self-employed-professional">Self-Employed Professional</option>
+                  <option value="business-owner">Business Owner / Entrepreneur</option>
+                </select>
+                <div class="text-xs text-slate-500" id="elig-request-note">Comparing a ₹35,00,000 loan</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div class="eligibility-dashboard mb-4">
+            <div class="card p-6">
+              <div class="flex-between mb-1">
+                <h3 class="text-lg font-bold">Your Max Eligible Loan</h3>
+                <span class="credit-tier-badge" id="elig-credit-tier">Excellent</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3">Best-case approval across all loan types, using a 50% FOIR rule adjusted for your credit tier.</p>
+              <div class="eligible-amount" id="eligible-amount">₹47,50,000</div>
+
+              <!-- Coverage gauge vs the loan you're comparing -->
+              <div class="mt-5">
+                <div class="flex-between text-xs text-slate-500 mb-1">
+                  <span id="elig-cover-label">How close you are to your ₹35,00,000 ask</span>
+                  <span id="elig-verdict" class="font-bold"></span>
+                </div>
+                <div class="elig-bar">
+                  <div class="elig-bar-fill" id="elig-cover-bar" style="width:0%"></div>
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 gap-4">
+                <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+                  <div class="text-xs text-slate-500">Safe Monthly EMI</div>
+                  <div class="font-bold text-emerald-600 text-lg" id="eligible-emi">₹28,500</div>
+                </div>
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                  <div class="text-xs text-slate-500">Your Annual Income</div>
+                  <div class="font-bold text-slate-900 text-lg" id="eligible-income">₹9,50,000</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card p-6">
+              <h3 class="text-lg font-bold mb-4">What Lenders Look At</h3>
+              <ul class="eligibility-list">
+                <li><i data-lucide="check" class="text-emerald-500"></i> <span><strong>Credit score</strong> — every offer card shows the bank's published minimum.</span></li>
+                <li><i data-lucide="check" class="text-emerald-500"></i> <span><strong>Stable income</strong> — we size EMIs at 50% of net monthly income as a rule of thumb.</span></li>
+                <li><i data-lucide="check" class="text-emerald-500"></i> <span><strong>Low existing obligations</strong> — current EMIs are deducted before we size your request.</span></li>
+                <li><i data-lucide="check" class="text-emerald-500"></i> <span><strong>Employment type</span> — some offers are published for salaried applicants only.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Loan-by-loan breakdown -->
+          <div class="card p-6 mb-4">
+            <div class="flex-between mb-4">
+              <h3 class="font-bold text-slate-900">Loan-By-Loan Breakdown</h3>
+              <span class="text-xs text-slate-500">Approval is per loan type</span>
+            </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="elig-loan-grid"></div>
+          </div>
+
+          <!-- Personalized tips -->
+          <div class="card p-6">
+            <h3 class="font-bold text-slate-900 mb-3"><i data-lucide="lightbulb" class="text-amber-500 w-4 h-4 inline-block mr-1"></i> Personalized Tips</h3>
+            <ul class="elig-tips" id="elig-tips"></ul>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 7: SETTINGS ==================== -->
+        <section id="view-settings" class="view-panel">
+          <div class="section-header">
+            <div>
+              <h2>Settings & Preferences</h2>
+              <p class="section-subtitle">Customize your LoanFinder experience and notification preferences.</p>
+            </div>
+          </div>
+          <div class="card p-6">
+            <div class="flex-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900">Email Notifications</h3>
+                <p class="text-xs text-slate-500">Get alerted when a bank lowers its advertised rate.</p>
+              </div>
+              <button class="toggle-switch" id="pref-email-alerts" role="switch" aria-checked="false" aria-label="Email notifications" onclick="app.togglePref('emailAlerts', this)"><span></span></button>
+            </div>
+            <div class="flex-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900">Rate Drop Alerts</h3>
+                <p class="text-xs text-slate-500">Receive a notification when rates fall below your target.</p>
+              </div>
+              <button class="toggle-switch on" id="pref-rate-drop-alerts" role="switch" aria-checked="true" aria-label="Rate drop alerts" onclick="app.togglePref('rateDropAlerts', this)"><span></span></button>
+            </div>
+            <div class="flex-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900">Currency Display</h3>
+                <p class="text-xs text-slate-500">Always shown in Indian Rupees (₹).</p>
+              </div>
+              <button class="toggle-switch on" id="pref-inr-display" role="switch" aria-checked="true" aria-label="Indian Rupee display" onclick="app.togglePref('inrDisplay', this)"><span></span></button>
+            </div>
+            <p class="text-xs text-slate-500 mb-3" id="prefs-status">Preferences are stored in this browser only (localStorage). No data is sent anywhere.</p>
+            <button class="btn btn-secondary mt-2" id="save-prefs-btn" onclick="app.savePreferences()">
+              <i data-lucide="save"></i> Save Preferences
+            </button>
+          </div>
+          <div class="card p-6 mt-6">
+            <div class="flex-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-900">Demo Data</h3>
+                <p class="text-xs text-slate-500">Restore the original seeded banks, P2P listings and saved offers. All local demo changes are wiped.</p>
+              </div>
+            </div>
+            <button class="btn btn-outline" onclick="app.resetDemoData()">
+              <i data-lucide="rotate-ccw"></i> Reset Demo Data
+            </button>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW 8: P2P LENDING ==================== -->
+        <section id="view-p2p" class="view-panel">
+          <div class="content-section">
+            <div class="section-header">
+              <div>
+                <div class="flex items-center gap-3">
+                  <h2>P2P Lending</h2>
+                  <span class="tag-pill tag-pill-blue"><i data-lucide="hand-coins" class="w-3.5 h-3.5"></i> Peer-to-Peer Demo</span>
+                </div>
+                <p class="section-subtitle">Post a request and review matched lenders with transparent terms — a product demo, not a live lending marketplace.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode Selection: Borrow and Lend open their own sub-features -->
+          <div class="p2p-mode-grid mb-0">
+            <div class="p2p-mode-card p2p-mode-borrow" data-mode="borrow" id="p2p-mode-borrow" onclick="app.setP2PMode('borrow')">
+              <span class="p2p-mode-blob"></span>
+              <div class="p2p-mode-icon"><i data-lucide="hand-coins"></i></div>
+              <div class="p2p-mode-body">
+                <span class="p2p-mode-num">01 &bull; Borrower</span>
+                <h3>Borrow Money</h3>
+                <p>Get a personal loan funded by verified individual lenders.</p>
+                <ul class="p2p-mode-points">
+                  <li><i data-lucide="check"></i> No application fee</li>
+                  <li><i data-lucide="check"></i> Sorted by best match</li>
+                </ul>
+              </div>
+              <button class="btn btn-primary btn-sm">Request a Loan</button>
+            </div>
+            <div class="p2p-mode-card p2p-mode-lend" data-mode="lend" id="p2p-mode-lend" onclick="app.setP2PMode('lend')">
+              <span class="p2p-mode-blob"></span>
+              <div class="p2p-mode-icon"><i data-lucide="piggy-bank"></i></div>
+              <div class="p2p-mode-body">
+                <span class="p2p-mode-num">02 &bull; Investor</span>
+                <h3>Lend Money</h3>
+                <p>Put your savings to work and earn interest every month.</p>
+                <ul class="p2p-mode-points">
+                  <li><i data-lucide="check"></i> Earn up to 24% p.a.</li>
+                  <li><i data-lucide="check"></i> Fund from ₹5,000</li>
+                </ul>
+              </div>
+              <button class="btn btn-primary btn-sm">Explore Borrowers</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== P2P SUB-FEATURE: BORROW MONEY ==================== -->
+        <section id="view-p2p-borrow" class="view-panel">
+          <div class="content-section">
+            <div class="section-header">
+              <div>
+                <button class="p2p-back-link" onclick="app.navigateTo('p2p')"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to P2P Lending</button>
+                <div class="flex items-center gap-3">
+                  <h2>Borrow Money</h2>
+                  <span class="tag-pill tag-pill-blue"><i data-lucide="hand-coins" class="w-3.5 h-3.5"></i> P2P &middot; Borrower</span>
+                </div>
+                <p class="section-subtitle">Get a personal loan funded by verified individual lenders — post a request, review your best matches and track funding progress.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p2p-notices mb-6">
+            <div class="disclaimer-banner">
+              <i data-lucide="flask-conical" class="disclaimer-icon"></i>
+              <div class="disclaimer-text">
+                <strong>Prototype Notice:</strong> This P2P marketplace is a demonstration feature for HackIndia 2026. No real money transfers, loans, investments, KYC verification, credit decisions, or financial contracts are performed.
+              </div>
+            </div>
+            <div class="p2p-risk-card">
+              <div class="p2p-risk-head">
+                <i data-lucide="shield-alert"></i>
+                <strong>P2P Lending Risk</strong>
+              </div>
+              <p>Returns are not guaranteed. Borrowers may delay or fail to repay. Review borrower information and risk indicators before making an investment.</p>
+            </div>
+          </div>
+
+          <!-- ============ BORROWER TOOLS ============ -->
+          <div class="p2p-panel">
+            <div class="content-section">
+              <div class="card p-6">
+                <div class="flex-between mb-5 flex-wrap gap-3">
+                  <div>
+                    <div class="card-title">
+                      <i data-lucide="edit-3" class="text-blue-600"></i>
+                      <h3>Request a Personal Loan</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Fill in your requirements. No credit check or obligation — this is a demo.</p>
+                  </div>
+                </div>
+
+                <div id="p2p-borrow-success" class="p2p-success hidden">
+                  <i data-lucide="check-circle-2"></i>
+                  <span>Your loan request was posted successfully! Lenders will now be able to discover it.</span>
+                </div>
+
+                <div class="p2p-form-grid">
+                  <div class="form-group">
+                    <label for="p2p-loan-amount">Loan Amount (₹)</label>
+                    <input type="number" id="p2p-loan-amount" class="form-input" min="5000" max="500000" value="80000" oninput="app.updateBorrowerPreview()" onchange="app.updateBorrowerPreview()" />
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-purpose">Purpose of Loan</label>
+                    <select id="p2p-purpose" class="form-select" onchange="app.updateBorrowerPreview()">
+                      <option value="Medical Emergency">Medical Emergency</option>
+                      <option value="Education Fees">Education Fees</option>
+                      <option value="Business Expansion">Business Expansion</option>
+                      <option value="Home Renovation">Home Renovation</option>
+                      <option value="Debt Consolidation">Debt Consolidation</option>
+                      <option value="Wedding Expenses">Wedding Expenses</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-tenure">Preferred Tenure</label>
+                    <select id="p2p-tenure" class="form-select" onchange="app.updateBorrowerPreview()">
+                      <option value="6">6 Months</option>
+                      <option value="9">9 Months</option>
+                      <option value="12" selected>12 Months</option>
+                      <option value="18">18 Months</option>
+                      <option value="24">24 Months</option>
+                      <option value="36">36 Months</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-max-rate">Maximum Acceptable Interest Rate (% p.a.)</label>
+                    <input type="number" id="p2p-max-rate" class="form-input" min="5" max="24" step="0.5" value="13" oninput="app.updateBorrowerPreview()" onchange="app.updateBorrowerPreview()" />
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-monthly-income">Monthly Income (₹)</label>
+                    <input type="number" id="p2p-monthly-income" class="form-input" min="10000" value="60000" oninput="app.updateBorrowerPreview()" onchange="app.updateBorrowerPreview()" />
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-employment">Employment Type</label>
+                    <select id="p2p-employment" class="form-select">
+                      <option value="Salaried">Salaried</option>
+                      <option value="Self-Employed">Self-Employed</option>
+                      <option value="Business Owner">Business Owner</option>
+                      <option value="Freelancer">Freelancer</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-credit-score">Estimated Credit Score</label>
+                    <select id="p2p-credit-score" class="form-select" onchange="app.updateBorrowerPreview()">
+                      <option value="780">Excellent (750 - 900)</option>
+                      <option value="720" selected>Good (700 - 749)</option>
+                      <option value="660">Average (650 - 699)</option>
+                      <option value="600">Needs Attention (&lt; 650)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="p2p-repay-date">Preferred Repayment Date</label>
+                    <select id="p2p-repay-date" class="form-select">
+                      <option>1st of every month</option>
+                      <option selected>5th of every month</option>
+                      <option>10th of every month</option>
+                      <option>15th of every month</option>
+                      <option>28th of every month</option>
+                    </select>
+                  </div>
+                  <div class="form-group p2p-description-group">
+                    <label for="p2p-description">Short Description / Reason for Borrowing</label>
+                    <textarea id="p2p-description" class="form-input" rows="2" placeholder="Briefly explain how you plan to use the funds and how you will repay...">Need funds urgently and will repay through steady monthly salary.</textarea>
+                  </div>
+                </div>
+
+                <!-- Calculated Preview -->
+                <div class="p2p-preview mt-5" id="borrower-preview">
+                  <div class="p2p-preview-head"><i data-lucide="calculator" class="w-4 h-4"></i> Calculated Preview <span class="text-xs font-normal text-slate-400">(estimates)</span></div>
+                  <div class="p2p-preview-grid">
+                    <div><div class="mini-stat-label">Requested Amount</div><div class="mini-stat-val text-blue-600" id="preview-amount">₹80,000</div></div>
+                    <div><div class="mini-stat-label">Estimated Monthly EMI</div><div class="mini-stat-val text-blue-600" id="preview-emi">₹0</div></div>
+                    <div><div class="mini-stat-label">Maximum Interest Rate</div><div class="mini-stat-val" id="preview-rate">13% p.a.</div></div>
+                    <div><div class="mini-stat-label">Tenure</div><div class="mini-stat-val" id="preview-tenure">12 months</div></div>
+                    <div><div class="mini-stat-label">Estimated Total Repayment</div><div class="mini-stat-val" id="preview-total">₹0</div></div>
+                  </div>
+                </div>
+
+                <div class="form-footer mt-5 flex justify-end gap-3 flex-wrap">
+                  <button class="btn btn-secondary" onclick="app.resetBorrowerForm()"><i data-lucide="rotate-ccw"></i> Reset</button>
+                  <button class="btn btn-outline" onclick="app.findBorrowerMatches()"><i data-lucide="sparkles"></i> Find Matching Lenders</button>
+                  <button class="btn btn-primary" onclick="app.submitLoanRequest()"><i data-lucide="send"></i> Post Loan Request</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recommended Matches (borrower side) -->
+            <div class="content-section">
+              <div class="section-header">
+                <div>
+                  <h3 class="p2p-h3"><i data-lucide="handshake" class="p2p-h3-icon p2p-ico-green"></i> Recommended Matches</h3>
+                  <p class="section-subtitle">Lenders most likely to fund requests like yours, based on amount, rate and tenure.</p>
+                </div>
+              </div>
+              <div class="p2p-match-grid" id="p2p-borrower-matches"></div>
+            </div>
+
+            <!-- My Loan Requests -->
+            <div class="content-section">
+              <div class="section-header">
+                <div>
+                  <h3 class="p2p-h3"><i data-lucide="clipboard-list" class="p2p-h3-icon p2p-ico-violet"></i> My Loan Requests</h3>
+                  <p class="section-subtitle">Track the funding progress of your posted loan requests.</p>
+                </div>
+              </div>
+              <div class="comparison-grid" id="p2p-my-requests"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== P2P SUB-FEATURE: LEND MONEY ==================== -->
+        <section id="view-p2p-lend" class="view-panel">
+          <div class="content-section">
+            <div class="section-header">
+              <div>
+                <button class="p2p-back-link" onclick="app.navigateTo('p2p')"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to P2P Lending</button>
+                <div class="flex items-center gap-3">
+                  <h2>Lend Money</h2>
+                  <span class="tag-pill tag-pill-success"><i data-lucide="piggy-bank" class="w-3.5 h-3.5"></i> P2P &middot; Investor</span>
+                </div>
+                <p class="section-subtitle">Put your savings to work and earn interest every month — match with borrowers, lend, and track your returns.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compact risk note -->
+          <div class="p2p-notices mb-6">
+            <div class="disclaimer-banner">
+              <i data-lucide="flask-conical" class="disclaimer-icon"></i>
+              <div class="disclaimer-text">
+                <strong>Prototype Notice:</strong> This is a demo for HackIndia 2026 — no real money moves and returns are not guaranteed. Borrowers may delay or miss repayments.
+              </div>
+            </div>
+          </div>
+
+          <!-- Lender tabs -->
+          <div class="lend-tabs mb-6">
+            <button class="lend-tab-btn active" data-lend-tab="lend-discover" onclick="app.switchLendTab('lend-discover')">
+              <i data-lucide="search" class="w-4 h-4"></i> Discover Borrowers
+            </button>
+            <button class="lend-tab-btn" data-lend-tab="lend-portfolio" onclick="app.switchLendTab('lend-portfolio')">
+              <i data-lucide="pie-chart" class="w-4 h-4"></i> My Investments
+            </button>
+          </div>
+
+          <!-- ============ TAB 1: DISCOVER BORROWERS ============ -->
+          <div class="lend-tab-content active" id="lend-discover">
+
+            <!-- Lending preferences (guided) -->
+            <div class="lend-pref-card card p-6 mb-6">
+              <div class="lend-pref-head">
+                <div class="lend-pref-icon">
+                  <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">Your Lending Preferences</h3>
+                  <p class="text-xs text-slate-500">Decide how you want to lend and we'll rank the best matches for you.</p>
+                </div>
+              </div>
+              <div class="controls-row mt-4">
+                <div class="control-group flex-1">
+                  <label for="p2p-lender-amount">Amount to Lend (₹)</label>
+                  <input type="number" id="p2p-lender-amount" class="form-input" min="5000" step="1000" value="50000" />
+                </div>
+                <div class="control-group">
+                  <label for="p2p-lender-maxrate">Max Rate (% p.a.)</label>
+                  <input type="number" id="p2p-lender-maxrate" class="form-input" min="5" max="24" step="0.5" value="15" />
+                </div>
+                <div class="control-group">
+                  <label for="p2p-lender-risk">Risk Tolerance</label>
+                  <select id="p2p-lender-risk" class="form-select">
+                    <option value="low">Low Risk</option>
+                    <option value="medium" selected>Medium Risk</option>
+                    <option value="high">High Risk / Max Returns</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="p2p-lender-tenure">Max Tenure</label>
+                  <select id="p2p-lender-tenure" class="form-select">
+                    <option value="12">12 Months</option>
+                    <option value="24" selected>24 Months</option>
+                    <option value="36">36 Months</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <button class="btn btn-primary" onclick="app.findLenderMatches()"><i data-lucide="sparkles"></i> Find Borrowers</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recommended matches -->
+            <div class="content-section">
+              <div class="section-header">
+                <div>
+                  <h3 class="p2p-h3"><i data-lucide="target" class="p2p-h3-icon p2p-ico-amber"></i> Recommended Matches For You</h3>
+                  <p class="section-subtitle">Borrower requests ranked by how well they fit your preferences above.</p>
+                </div>
+              </div>
+              <div class="p2p-match-grid" id="p2p-lender-matches"></div>
+            </div>
+
+            <!-- Borrowers marketplace -->
+            <div class="content-section">
+              <div class="section-header flex-wrap gap-3">
+                <div>
+                  <h3 class="p2p-h3"><i data-lucide="store" class="p2p-h3-icon p2p-ico-blue"></i> Browse All Borrowers</h3>
+                  <p class="section-subtitle">Review every verified loan request and lend to anyone you like.</p>
+                </div>
+              </div>
+              <div class="locator-controls card p-4 mb-4">
+                <div class="controls-row">
+                  <div class="control-group flex-1">
+                    <label for="p2p-market-search">Search</label>
+                    <div class="input-icon-wrapper">
+                      <i data-lucide="search" class="input-icon"></i>
+                      <input type="text" id="p2p-market-search" class="form-input with-icon" placeholder="Search purpose, name..." oninput="app.filterP2PMarketplace()" />
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="p2p-risk-filter">Risk</label>
+                    <select id="p2p-risk-filter" class="form-select" onchange="app.filterP2PMarketplace()">
+                      <option value="all">All Risk Levels</option>
+                      <option value="Low">Low Risk</option>
+                      <option value="Medium">Medium Risk</option>
+                      <option value="High">High Risk</option>
+                    </select>
+                  </div>
+                  <div class="control-group">
+                    <label for="p2p-sort">Sort by</label>
+                    <select id="p2p-sort" class="form-select" onchange="app.filterP2PMarketplace()">
+                      <option value="match">Best Match</option>
+                      <option value="rate-asc">Lowest Interest</option>
+                      <option value="amount-desc">Highest Amount</option>
+                      <option value="tenure-asc">Shortest Tenure</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="p2p-borrower-grid" id="p2p-marketplace"></div>
+            </div>
+          </div>
+
+          <!-- ============ TAB 2: MY INVESTMENTS ============ -->
+          <div class="lend-tab-content hidden" id="lend-portfolio">
+            <div class="content-section">
+              <div class="section-header">
+                <div>
+                  <h3 class="p2p-h3"><i data-lucide="pie-chart" class="p2p-h3-icon p2p-ico-violet"></i> My P2P Portfolio</h3>
+                  <p class="section-subtitle">A snapshot of your demo investments and expected returns.</p>
+                </div>
+              </div>
+              <div class="p2p-summary-grid mb-4">
+                <div class="p2p-stat-card p2p-stat-blue"><i data-lucide="wallet"></i><div><div class="mini-stat-label">Total Invested</div><div class="mini-stat-val text-lg" id="p2p-total-invested">₹0</div></div></div>
+                <div class="p2p-stat-card p2p-stat-emerald"><i data-lucide="trending-up"></i><div><div class="mini-stat-label">Expected Returns</div><div class="mini-stat-val text-lg" id="p2p-expected-returns">₹0</div></div></div>
+                <div class="p2p-stat-card p2p-stat-violet"><i data-lucide="gift"></i><div><div class="mini-stat-label">Interest Earned</div><div class="mini-stat-val text-lg" id="p2p-interest-earned">₹0</div></div></div>
+                <div class="p2p-stat-card p2p-stat-slate"><i data-lucide="layers"></i><div><div class="mini-stat-label">Active Loans</div><div class="mini-stat-val text-lg" id="p2p-active-loans">0</div></div></div>
+              </div>
+              <div class="comparison-grid" id="p2p-portfolio"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== P2P BORROWER DETAILS MODAL ==================== -->
+  <div id="p2p-details-modal" class="modal-overlay hidden">
+    <div class="modal-card modal-card-lg">
+      <button class="modal-close-btn" onclick="app.closeP2PModal('p2p-details-modal')">
+        <i data-lucide="x"></i>
+      </button>
+      <div id="p2p-details-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== P2P LEND MODAL ==================== -->
+  <div id="p2p-lend-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="app.closeP2PModal('p2p-lend-modal')">
+        <i data-lucide="x"></i>
+      </button>
+      <div id="p2p-lend-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== P2P CHAT MODAL ==================== -->
+  <div id="p2p-chat-modal" class="modal-overlay hidden">
+    <div class="modal-card modal-card-lg chat-card">
+      <div id="p2p-chat-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== AUTH PAGE (LOGIN / SIGN UP) ==================== -->
+  <div id="auth-page" style="display:none;">
+    <div class="auth-layout">
+
+      <!-- Left brand panel -->
+      <div class="auth-brand-panel">
+        <button class="auth-back-link" id="auth-back-link">
+          <i data-lucide="arrow-left"></i> Back to Home
+        </button>
+        <div class="auth-brand-content">
+          <div class="logo-container" style="justify-content:center">
+            <div class="logo-icon"><i data-lucide="percent"></i></div>
+            <span class="logo-text">Loan<span class="text-blue-300">Finder</span></span>
+          </div>
+          <h2>Compare. Decide.<br />Borrow with confidence.</h2>
+            <p>Access your personalized loan offers, saved comparisons, documents and bank branches — all in one dashboard. Data stays in this browser.</p>
+          <div class="auth-brand-features">
+            <div class="auth-brand-feature">
+              <i data-lucide="shield-check"></i>
+              <span>Runs in your browser — your loan data never leaves this device</span>
+            </div>
+            <div class="auth-brand-feature">
+              <i data-lucide="zap"></i>
+              <span>Advertised rates from 5 banks (7 live offers)</span>
+            </div>
+            <div class="auth-brand-feature">
+              <i data-lucide="headphones"></i>
+              <span>Clear eligibility and EMI breakdowns</span>
+            </div>
+          </div>
+        </div>
+        <div class="auth-brand-stats">
+          <div>
+            <div class="auth-stat-num">5</div>
+            <div class="auth-stat-label">Banks</div>
+          </div>
+          <div>
+            <div class="auth-stat-num">7.85%</div>
+            <div class="auth-stat-label">Starting Rate</div>
+          </div>
+          <div>
+            <div class="auth-stat-num">7</div>
+            <div class="auth-stat-label">Live Offers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right form panel -->
+      <div class="auth-form-panel">
+        <button class="modal-close-btn" id="auth-page-close" title="Close">
+          <i data-lucide="x"></i>
+        </button>
+        <div class="auth-form-wrap">
+          <div class="auth-header">
+            <h3 class="text-2xl font-extrabold text-slate-900">Welcome to LoanFinder</h3>
+            <p class="text-slate-500 text-sm mt-1">Sign in to compare the best loan offers</p>
+          </div>
+
+          <!-- Auth Tabs -->
+          <div class="auth-tab-switch mt-6">
+            <button class="auth-tab-btn active" id="auth-tab-login" onclick="app.switchAuthTab('login')">Sign In</button>
+            <button class="auth-tab-btn" id="auth-tab-signup" onclick="app.switchAuthTab('signup')">Create Account</button>
+          </div>
+
+          <!-- Sign In Form -->
+          <form id="auth-login-form" class="auth-form mt-6" onsubmit="event.preventDefault(); app.handleAuthSuccess();">
+            <div class="form-group mb-3">
+              <label for="login-email">Email or Username</label>
+              <input type="email" id="login-email" class="form-input" placeholder="name@example.com" required value="alex.j@example.com" />
+            </div>
+            <div class="form-group mb-3">
+              <div class="flex-between">
+                <label for="login-password">Password</label>
+                <a href="#" class="text-xs text-blue-600 hover:underline" onclick="event.preventDefault(); toast('Password reset needs a server, which this prototype does not have yet.'); return false;">Forgot password?</a>
+              </div>
+              <div class="password-field">
+                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required value="password123" />
+                <button type="button" class="password-toggle" onclick="app.togglePassword(this)" aria-label="Show password">
+                  <i data-lucide="eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between mb-4">
+              <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                <input type="checkbox" checked class="rounded" /> Remember me
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-full py-2.5 font-semibold">
+                <i data-lucide="log-in"></i> Sign In
+            </button>
+          </form>
+
+          <!-- Sign Up Form -->
+          <form id="auth-signup-form" class="auth-form mt-6" style="display:none;" onsubmit="event.preventDefault(); app.handleAuthSuccess();">
+            <div class="form-grid">
+              <div class="form-group mb-3">
+                <label for="signup-first">First Name</label>
+                <input type="text" id="signup-first" class="form-input" placeholder="Alex" required />
+              </div>
+              <div class="form-group mb-3">
+                <label for="signup-last">Last Name</label>
+                <input type="text" id="signup-last" class="form-input" placeholder="Johnson" required />
+              </div>
+            </div>
+            <div class="form-group mb-3">
+              <label for="signup-email">Email Address</label>
+              <input type="email" id="signup-email" class="form-input" placeholder="name@example.com" required />
+            </div>
+            <div class="form-group mb-3">
+              <label for="signup-password">Create Password</label>
+              <div class="password-field">
+                <input type="password" id="signup-password" class="form-input" placeholder="Min. 8 characters" required />
+                <button type="button" class="password-toggle" onclick="app.togglePassword(this)" aria-label="Show password">
+                  <i data-lucide="eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mb-4">
+              <input type="checkbox" required class="rounded" />
+              <label class="text-xs text-slate-600 cursor-pointer">
+                I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> &amp; <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-full py-2.5 font-semibold">
+              <i data-lucide="user-plus"></i> Create My Account
+            </button>
+          </form>
+
+          <div class="auth-divider">
+            <span>or continue with</span>
+          </div>
+
+          <div class="auth-social">
+            <button class="btn btn-outline flex-1" onclick="toast('Google sign-in is not wired up in this prototype.')">
+              <span class="social-google">G</span> Google
+            </button>
+            <button class="btn btn-outline flex-1" onclick="toast('Apple sign-in is not wired up in this prototype.')">
+              <span class="social-apple">A</span> Apple
+            </button>
+          </div>
+
+          <div class="auth-footer text-center mt-5">
+            <span class="text-xs text-slate-500">Prototype build — no server, so nothing you type is transmitted or stored</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== DIGILOCKER MODAL ==================== -->
+  <div id="digilocker-modal" class="modal-overlay hidden" onclick="if(event.target===this)app.closeDigiLockerModal()">
+    <div class="modal-content digilocker-modal-content">
+      <div class="digilocker-modal-header">
+        <div class="flex items-center gap-3">
+          <div class="digilocker-modal-logo">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none"><rect width="24" height="24" rx="4" fill="#00356B"/><path d="M6 8.5C6 7.67 6.67 7 7.5 7h9c.83 0 1.5.67 1.5 1.5v7c0 .83-.67 1.5-1.5 1.5h-9C6.67 17 6 16.33 6 15.5v-7zM8 10h8v1H8v-1zm0 3h6v1H8v-1z" fill="#fff"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Connect to DigiLocker</h3>
+            <p class="text-xs text-slate-500">Government of India's official document wallet</p>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="app.closeDigiLockerModal()" aria-label="Close">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Step 1: Login Prompt -->
+      <div class="digilocker-step" id="digilocker-step-login">
+        <div class="digilocker-step-body">
+          <div class="digilocker-illustration">
+            <i data-lucide="shield-check" class="w-12 h-12 text-blue-600"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2">Sign in with DigiLocker</h4>
+              <p class="text-sm text-slate-500 mb-4 text-center">Enter your Aadhaar number to sign in. This demo only simulates the DigiLocker flow &mdash; no OTP is sent, no Aadhaar-linked service is contacted and no data leaves your browser.</p>
+          <div class="digilocker-form">
+            <div class="form-group">
+              <label class="form-label text-xs font-semibold text-slate-700" for="digilocker-aadhaar">Aadhaar Number</label>
+              <input type="text" class="form-input" id="digilocker-aadhaar" placeholder="XXXX XXXX XXXX" maxlength="14" inputmode="numeric" oninput="app.formatAadhaar(this)" onkeydown="if(event.key==='Enter'&amp;&amp;this.value.replace(/\D/g,'').length===12)app.sendDigiLockerOTP()">
+            </div>
+            <button class="btn btn-digilocker w-full" id="digilocker-send-otp-btn" onclick="app.sendDigiLockerOTP()" disabled>
+              <i data-lucide="smartphone" class="w-4 h-4"></i> Send OTP
+            </button>
+          </div>
+          <div class="digilocker-security-note">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+            <span>Prototype demo: your Aadhaar stays in this browser tab and is never stored or sent anywhere.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: OTP Verification -->
+      <div class="digilocker-step hidden" id="digilocker-step-otp">
+        <div class="digilocker-step-body">
+          <div class="digilocker-illustration">
+            <i data-lucide="smartphone" class="w-12 h-12 text-blue-600"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2">Enter OTP</h4>
+          <p class="text-sm text-slate-500 mb-4 text-center">A 6-digit OTP would be sent to your <strong id="digilocker-mobile-mask">registered mobile number</strong> by DigiLocker. This prototype simulates the flow — use any 6 digits.</p>
+          <div class="digilocker-form">
+            <div class="otp-input-group" id="digilocker-otp-group">
+              <input type="text" class="otp-input" maxlength="1" data-otp="0" inputmode="numeric" oninput="app.handleOTPInput(this, 0)" onkeydown="app.handleOTPKeydown(event, 0)">
+              <input type="text" class="otp-input" maxlength="1" data-otp="1" inputmode="numeric" oninput="app.handleOTPInput(this, 1)" onkeydown="app.handleOTPKeydown(event, 1)">
+              <input type="text" class="otp-input" maxlength="1" data-otp="2" inputmode="numeric" oninput="app.handleOTPInput(this, 2)" onkeydown="app.handleOTPKeydown(event, 2)">
+              <span class="otp-dash">-</span>
+              <input type="text" class="otp-input" maxlength="1" data-otp="3" inputmode="numeric" oninput="app.handleOTPInput(this, 3)" onkeydown="app.handleOTPKeydown(event, 3)">
+              <input type="text" class="otp-input" maxlength="1" data-otp="4" inputmode="numeric" oninput="app.handleOTPInput(this, 4)" onkeydown="app.handleOTPKeydown(event, 4)">
+              <input type="text" class="otp-input" maxlength="1" data-otp="5" inputmode="numeric" oninput="app.handleOTPInput(this, 5)" onkeydown="app.handleOTPKeydown(event, 5)">
+            </div>
+            <button class="btn btn-digilocker w-full" id="digilocker-verify-btn" onclick="app.verifyDigiLockerOTP()" disabled>
+              <i data-lucide="check-circle" class="w-4 h-4"></i> Verify & Connect
+            </button>
+          </div>
+          <div class="digilocker-resend">
+            <span class="text-xs text-slate-500">Didn't receive?</span>
+            <button class="text-xs text-blue-600 font-semibold" onclick="app.resendDigiLockerOTP()" id="digilocker-resend-btn">Resend OTP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Fetching Documents -->
+      <div class="digilocker-step hidden" id="digilocker-step-fetching">
+        <div class="digilocker-step-body">
+          <div class="digilocker-fetching-animation">
+            <div class="digilocker-spinner"></div>
+            <i data-lucide="file-search" class="w-8 h-8 text-blue-600"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2">Fetching Your Documents</h4>
+          <p class="text-sm text-slate-500 text-center">Connecting to DigiLocker and retrieving your verified documents...</p>
+          <div class="digilocker-fetching-progress" id="digilocker-fetch-progress">
+            <div class="fetching-item"><i data-lucide="loader" class="w-4 h-4 spin"></i> <span>Aadhaar Card</span><span class="fetch-status">Fetching...</span></div>
+            <div class="fetching-item pending"><i data-lucide="circle" class="w-4 h-4"></i> <span>PAN Card</span><span class="fetch-status">Waiting...</span></div>
+            <div class="fetching-item pending"><i data-lucide="circle" class="w-4 h-4"></i> <span>Driving License</span><span class="fetch-status">Waiting...</span></div>
+            <div class="fetching-item pending"><i data-lucide="circle" class="w-4 h-4"></i> <span>Class X Certificate</span><span class="fetch-status">Waiting...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Select Documents to Import -->
+      <div class="digilocker-step hidden" id="digilocker-step-select">
+        <div class="digilocker-step-body">
+          <h4 class="font-bold text-slate-900 mb-1">Your DigiLocker Documents</h4>
+          <p class="text-sm text-slate-500 mb-4">Select the documents you want to import for your loan application.</p>
+          <div class="digilocker-doc-list" id="digilocker-doc-list">
+            <!-- Injected via JS -->
+          </div>
+          <div class="flex gap-3 mt-4">
+            <button class="btn btn-outline flex-1" onclick="app.closeDigiLockerModal()">Cancel</button>
+            <button class="btn btn-digilocker flex-1" id="digilocker-import-btn" onclick="app.importSelectedDigiLockerDocs()" disabled>
+              <i data-lucide="download" class="w-4 h-4"></i> Import Selected (<span id="digilocker-selected-count">0</span>)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Import Success -->
+      <div class="digilocker-step hidden" id="digilocker-step-success">
+        <div class="digilocker-step-body">
+          <div class="digilocker-success-icon">
+            <i data-lucide="check-circle-2" class="w-16 h-16 text-emerald-500"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-2">Documents Imported!</h4>
+              <p class="text-sm text-slate-500 text-center mb-4">Your selected sample documents have been imported into this demo and linked to your loan application.</p>
+          <div class="digilocker-imported-summary" id="digilocker-imported-summary">
+            <!-- Injected via JS -->
+          </div>
+          <button class="btn btn-digilocker w-full mt-4" onclick="app.closeDigiLockerModal()">
+            <i data-lucide="check" class="w-4 h-4"></i> Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SUPPORT CHATBOT ==================== -->
+  <div id="support-widget" class="support-widget hidden">
+    <button id="support-fab" class="support-fab" onclick="app.toggleSupportWidget()" aria-label="Customer Support">
+      <i data-lucide="message-circle" class="support-fab-icon"></i>
+      <i data-lucide="x" class="support-fab-close"></i>
+    </button>
+
+    <div id="support-panel" class="support-panel hidden">
+      <div class="support-header">
+        <div class="support-avatar"><i data-lucide="headphones"></i></div>
+        <div class="support-titles">
+          <h4>LoanFinder Support</h4>
+          <span class="support-online"><i data-lucide="circle-dot" class="w-2.5 h-2.5"></i> Online &bull; instant replies</span>
+        </div>
+        <button class="support-close" onclick="app.toggleSupportWidget()" aria-label="Close chat"><i data-lucide="x"></i></button>
+      </div>
+      <div id="support-messages" class="support-messages"></div>
+      <div id="support-quick" class="support-quick"></div>
+      <div class="support-input-row">
+        <input id="support-input" class="form-input" type="text" aria-label="Message LoanFinder Support" placeholder="Ask about loans, EMI, documents..." maxlength="200" onkeydown="if(event.key==='Enter')app.sendSupportMessage()" />
+        <button class="support-send" onclick="app.sendSupportMessage()" aria-label="Send"><i data-lucide="send"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons on load (guarded so a missing library never throws)
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    });
+  </script>
+  <script>
+    // Premium polish: gentle scroll-reveal choreography + stat count-up.
+    // Visual-only enhancement — never touches layout or app state. Safe no-op
+    // when IntersectionObserver is unavailable or the user prefers reduced motion.
+    (function () {
+      try {
+        if (!('IntersectionObserver' in window)) return;
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        var revealRoots = document.querySelectorAll(
+          '.view-panel, .landing-hero, .landing-stats, .landing-section, .landing-cta, .landing-footer, .auth-form-panel'
+        );
+
+        var revealTargets = [];
+
+        revealRoots.forEach(function (root) {
+          var kids = Array.prototype.slice.call(root.children);
+          kids.forEach(function (kid, i) {
+            if (kid.classList && kid.classList.contains('landing-hero-glow')) return;
+            kid.classList.add('reveal');
+            var delay = root.classList.contains('landing-hero') ? (i === 0 ? 80 : 200) : (i * 90) % 320;
+            kid.style.transitionDelay = delay + 'ms';
+            revealTargets.push(kid);
+          });
+        });
+
+        if (revealTargets.length) {
+          var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              var el = entry.target;
+              el.classList.add('reveal-in');
+              setTimeout(function () {
+                el.style.transitionDelay = '';
+                el.classList.remove('reveal', 'reveal-in');
+              }, 1300);
+              obs.unobserve(el);
+            });
+          }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+          revealTargets.forEach(function (el) { obs.observe(el); });
+        }
+
+        // Count-up animation for .stat-number values (e.g. "7.85%", "₹1,500 Cr+")
+        var stats = document.querySelectorAll('.stat-number');
+        if (stats.length) {
+          function animateCount(el) {
+            var raw = el.textContent.trim();
+            var parts = raw.match(/^([^\d]*)([\d.,]+)(.*)$/);
+            if (!parts) return;
+            var prefix = parts[1];
+            var numStr = parts[2];
+            var suffix = parts[3];
+            var target = parseFloat(numStr.replace(/,/g, ''));
+            if (isNaN(target)) return;
+            var decimals = (numStr.split('.')[1] || '').length;
+            var start = performance.now();
+            var duration = 1400;
+            var nf = new Intl.NumberFormat('en-IN', {
+              minimumFractionDigits: decimals,
+              maximumFractionDigits: decimals
+            });
+            function tick(now) {
+              var p = Math.min((now - start) / duration, 1);
+              var eased = 1 - Math.pow(1 - p, 3);
+              el.textContent = prefix + nf.format(target * eased) + suffix;
+              if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+          }
+          var statObs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              animateCount(entry.target);
+              statObs.unobserve(entry.target);
+            });
+          }, { threshold: 0.5 });
+          stats.forEach(function (el) { el.classList.add('count-up'); statObs.observe(el); });
+        }
+      } catch (e) { /* enhancement is strictly optional */ }
+    })();
+  </script>
+</body>
+</html>
