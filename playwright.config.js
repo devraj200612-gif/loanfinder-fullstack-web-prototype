@@ -1,10 +1,10 @@
-// Playwright configuration for the LoanFinder static app.
+// Playwright configuration for the LoanFinder app.
 //
-// The app is a pure static site (index.html + app.js + styles.css + vendor/),
-// so there is no server to start: specs load it over file:// exactly the way a
-// user opens the folder. Tests are serialised per worker because the app keeps
-// view state in a single shared object and a map style cache; running specs
-// concurrently against one page races on that state.
+// Phase 2D: the frontend is served over HTTP by the Express backend (server.js)
+// and reads its catalogue data from the /api endpoints, so the Playwright
+// suite runs against a real web server instead of file://. Tests are still
+// serialised per worker because the app keeps view state in a single shared
+// object and a map style cache.
 const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
@@ -21,8 +21,18 @@ module.exports = defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }]
   ],
   outputDir: 'test-results',
+  webServer: {
+    // `npm run pretest` (db:init) runs automatically before `npm test`, so the
+    // database is always rebuilt from the canonical dataset before the server
+    // starts. The base URL must stay in sync with tests/helpers.js (APP_URL).
+    command: 'node server.js',
+    url: 'http://127.0.0.1:8080/api/health',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
   use: {
     ...devices['Desktop Chrome'],
+    baseURL: 'http://127.0.0.1:8080',
     viewport: { width: 1440, height: 900 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

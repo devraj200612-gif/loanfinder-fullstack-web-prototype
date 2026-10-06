@@ -2,7 +2,7 @@
 const path = require('path');
 const { expect } = require('@playwright/test');
 
-const APP_URL = 'file:///' + path.resolve(__dirname, '..', 'index.html').replace(/\\/g, '/');
+const APP_URL = 'http://127.0.0.1:8080/';
 
 // The regression fixture from the original hand-written suite. These are also
 // the values the app ships as defaults, so the dashboard is already in this

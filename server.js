@@ -1,11 +1,11 @@
-// LoanFinder API - Phase 2A/2C backend.
+// LoanFinder API - Phase 2A/2C/2D backend.
 //
 // Scope: a minimal Express server with a health endpoint (Phase 2A) plus a
 // read-only REST data layer on top of the Phase 2B SQLite database (Phase 2C).
-// No write endpoints, no authentication. Static serving of the existing Phase 1
-// frontend remains additive: the frontend still runs from file://, still uses
-// its own BANK_OFFERS / BRANCH_DATA / localStorage and is NOT migrated to these
-// APIs yet (that is Phase 2D).
+// No write endpoints, no authentication. Static serving of the Phase 1
+// frontend, now driven over HTTP: the frontend fetches its read data from
+// these /api endpoints (Phase 2D) using relative URLs in api.js, so there is no
+// CORS and no hardcoded host.
 'use strict';
 
 const path = require('path');
@@ -30,10 +30,10 @@ app.get('/api/health', (req, res) => {
 // Static frontend.
 //
 // Only the files the Phase 1 app actually needs are published: index.html,
-// styles.css, app.js and vendor/. Everything else in the project folder
+// styles.css, app.js, api.js and vendor/. Everything else in the project folder
 // (node_modules, tests, .git, reports, package.json) stays private.
 // ---------------------------------------------------------------------------
-const STATIC_FILES = new Set(['/', '/index.html', '/styles.css', '/app.js']);
+const STATIC_FILES = new Set(['/', '/index.html', '/styles.css', '/app.js', '/api.js']);
 const VENDOR_FILE = /^\/vendor\/(?:[^/]+\/)*[^/]+\.(?:js|css|png)$/;
 
 app.use((req, res, next) => {

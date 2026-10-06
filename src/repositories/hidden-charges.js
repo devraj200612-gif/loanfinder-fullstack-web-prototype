@@ -14,7 +14,7 @@ function listByOffer(db, offerId) {
   if (!h) return null;
   return h
     .prepare(
-      `SELECT id, offer_id, name, description, fee_text, fee, fee_percent
+      `SELECT id, offer_id, name, description, fee_text, fee, fee_percent, icon, informational
        FROM hidden_charges WHERE offer_id = ? ORDER BY id`
     )
     .all(String(offerId));

@@ -1,9 +1,10 @@
 'use strict';
 
-// Read-only database validation for Phase 2B.
+// Read-only database validation for Phase 2B (refreshed for Phase 2D).
 // Verifies the seeded data/loanfinder.sqlite against both the meta recorded at
-// seed time and the live frontend source of truth (app.js). Exits non-zero on
-// any mismatch. Safe to run any time; does not modify the database.
+// seed time and the canonical dataset snapshot (data/loanfinder-data.json).
+// Exits non-zero on any mismatch. Safe to run any time; does not modify the
+// database.
 
 const fs = require('fs');
 const path = require('path');
@@ -14,7 +15,7 @@ const { normalize, checkSourceInvariants } = require('./data-pipeline');
 
 const ROOT = path.resolve(__dirname, '..');
 const DB_PATH = path.join(ROOT, 'data', 'loanfinder.sqlite');
-const SCHEMA_VERSION = '1';
+const SCHEMA_VERSION = '2';
 
 const PASS = [];
 const FAIL = [];
@@ -43,7 +44,7 @@ const BRANCH_COLS = [
   'id', 'bank_id', 'city', 'branch_name', 'address', 'hours', 'phone', 'latitude', 'longitude',
   'geo_precision', 'ifsc', 'source_url', 'source_name', 'verification_status', 'last_verified_at',
 ];
-const CHARGE_COLS = ['id', 'offer_id', 'name', 'description', 'fee_text', 'fee', 'fee_percent'];
+const CHARGE_COLS = ['id', 'offer_id', 'name', 'description', 'fee_text', 'fee', 'fee_percent', 'icon', 'informational'];
 
 function main() {
   if (!fs.existsSync(DB_PATH)) {
@@ -116,9 +117,9 @@ function main() {
   const expCharges = expected.chargeRows.map((r) => pick(r, CHARGE_COLS)).sort(byId);
 
   const cmp = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-  record('loan_offers parity vs app.js', cmp(dbOffers, expOffers));
-  record('branches parity vs app.js', cmp(dbBranches, expBranches));
-  record('hidden_charges parity vs app.js', cmp(dbCharges, expCharges));
+  record('loan_offers parity vs canonical dataset', cmp(dbOffers, expOffers));
+  record('branches parity vs canonical dataset', cmp(dbBranches, expBranches));
+  record('hidden_charges parity vs canonical dataset', cmp(dbCharges, expCharges));
 
   // ---- 7. meta sanity ----
   const meta = Object.fromEntries(db.prepare('SELECT key, value FROM meta').all().map((r) => [r.key, r.value]));

@@ -29,6 +29,22 @@
 </head>
 <body class="bg-slate-50 text-slate-900">
 
+  <!-- Boot overlay (Phase 2D): shown while the catalogue loads from the REST
+       API. If the API is unreachable it swaps to an explicit error + Retry
+       state - there is never a silent fallback to hardcoded data. -->
+  <div id="boot-overlay" class="boot-overlay boot-hidden" role="status" aria-live="polite">
+    <div class="boot-overlay-card">
+      <div class="boot-spinner" aria-hidden="true"></div>
+      <div id="boot-message" class="boot-message">Loading LoanFinder...</div>
+      <div id="boot-retry" class="boot-retry" hidden>
+        <p id="boot-error-detail" class="boot-error-detail"></p>
+        <button id="boot-retry-btn" class="btn btn-primary" onclick="window.app.retryBoot()">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Retry
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== PUBLIC LANDING PAGE ==================== -->
   <div id="landing">
     <!-- Landing Navbar -->
@@ -1727,6 +1743,7 @@
   </div>
 
   <!-- JavaScript Application Logic -->
+  <script src="api.js"></script>
   <script src="app.js"></script>
   <script>
     // Initialize Lucide icons on load (guarded so a missing library never throws)

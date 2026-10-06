@@ -1,13 +1,16 @@
 'use strict';
 
-// LoanFinder database initializer + seeder (Phase 2B).
+// LoanFinder database initializer + seeder (Phase 2B, refreshed in Phase 2D).
 //
 // Behaviour:
 //   - Creates data/loanfinder.sqlite (parent dir created on demand).
 //   - Creates all tables from db/schema.sql (idempotent DDL).
-//   - Clears and re-seeds from the frontend's own data (app.js via
-//     scripts/extract-app-data.js) inside a single transaction, so re-running
-//     `npm run db:init` can never duplicate rows or leave a partial state.
+//   - Clears and re-seeds from the canonical dataset snapshot
+//     (data/loanfinder-data.json via scripts/extract-app-data.js) inside a
+//     single transaction, so re-running `npm run db:init` can never duplicate
+//     rows or leave a partial state.
+//   - Drops and recreates the tables first, so an older schema revision is
+//     always rebuilt with the current DDL.
 //   - Writes a validation summary to stdout and exits non-zero on failure.
 //
 // The generated database file is gitignored; this script is the reproducible
@@ -25,7 +28,7 @@ const DATA_DIR = path.join(ROOT, 'data');
 const DB_PATH = path.join(DATA_DIR, 'loanfinder.sqlite');
 const SCHEMA_SQL = path.join(ROOT, 'db', 'schema.sql');
 
-const SCHEMA_VERSION = '1';
+const SCHEMA_VERSION = '2';
 const SEED_TOOL = 'scripts/init-db.js';
 
 function buildReport(db, data) {
@@ -103,8 +106,8 @@ function seed(db, data) {
       @geo_precision, @ifsc, @source_url, @source_name, @verification_status, @last_verified_at
     )`);
   const insertCharge = db.prepare(`
-    INSERT INTO hidden_charges (id, offer_id, name, description, fee_text, fee, fee_percent)
-    VALUES (@id, @offer_id, @name, @description, @fee_text, @fee, @fee_percent)`);
+    INSERT INTO hidden_charges (id, offer_id, name, description, fee_text, fee, fee_percent, icon, informational)
+    VALUES (@id, @offer_id, @name, @description, @fee_text, @fee, @fee_percent, @icon, @informational)`);
   const insertMeta = db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)');
 
   const store = db.transaction(() => {
@@ -197,7 +200,7 @@ function assertParity(db, data) {
 function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 
-  console.log('Loading source data from app.js (frontend source of truth)...');
+  console.log('Loading source data from the canonical dataset (data/loanfinder-data.json)...');
   const frontend = loadFrontendData();
   checkSourceInvariants(frontend);
   const data = normalize(frontend);
@@ -207,6 +210,18 @@ function main() {
   db.pragma('foreign_keys = ON');
 
   const schema = fs.readFileSync(SCHEMA_SQL, 'utf8');
+
+  // Drop any previous tables first (children before parents) so a database
+  // created by an older schema revision is rebuilt with the current DDL. The
+  // database is disposable and gitignored; re-seeding from canonical data is
+  // the reproducible path.
+  db.exec(`
+    DROP TABLE IF EXISTS hidden_charges;
+    DROP TABLE IF EXISTS loan_offers;
+    DROP TABLE IF EXISTS branches;
+    DROP TABLE IF EXISTS banks;
+    DROP TABLE IF EXISTS meta;
+  `);
   db.exec(schema);
 
   console.log('Clearing and seeding (single transaction)...');

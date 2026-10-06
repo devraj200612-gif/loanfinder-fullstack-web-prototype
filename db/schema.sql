@@ -102,7 +102,10 @@ CREATE TABLE IF NOT EXISTS branches (
 -- Preserves the frontend HIDDEN_CHARGES fine-print dataset (keyed by offer id)
 -- so no meaningful offer-level data is lost. fee_text preserves the original
 -- display string (e.g. '₹6,000-12,000'); fee and fee_percent keep the numeric
--- representation.
+-- representation. icon keeps the lucide glyph name the UI renders (Phase 2D:
+-- the frontend now reads this data from the API and needs the icon back), and
+-- informational marks rows that are purely disclosure (no charge) so the
+-- frontend's cost estimate and "(informational)" badge keep working.
 -- --------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS hidden_charges (
   id            TEXT PRIMARY KEY,
@@ -112,6 +115,8 @@ CREATE TABLE IF NOT EXISTS hidden_charges (
   fee_text      TEXT,
   fee           REAL,
   fee_percent   INTEGER NOT NULL DEFAULT 0,
+  icon          TEXT,
+  informational INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at    TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE (offer_id, name)

@@ -1,104 +1,49 @@
 'use strict';
 
-// Loader that extracts LoanFinder's source-of-truth datasets straight from the
-// frontend (app.js). The frontend declares BANK_OFFERS / BRANCH_DATA /
-// HIDDEN_CHARGES / LOAN_TYPES as top-level `const`s inside a browser script, so
-// we run it in a sandboxed VM with inert browser stubs and read the constants
-// via a capture expression appended to the source. This keeps the seed bound to
-// the exact running data: no transcription, no drift, nothing new invented.
+// Loader for LoanFinder's source-of-truth datasets (Phase 2D).
+//
+// The datasets (BANK_OFFERS / BRANCH_DATA / HIDDEN_CHARGES / LOAN_TYPES) were
+// originally declared as `const`s inside app.js and extracted by running the
+// browser script in a sandboxed VM. Phase 2D migrates the frontend to fetch
+// this data from the Phase 2C REST API, so the constants are removed from
+// app.js and the seed now reads the committed canonical snapshot instead:
+//
+//   data/loanfinder-data.json
+//
+// The snapshot was generated verbatim from the app.js constants before the
+// migration, so the database is still bound to the exact shipped data: no
+// transcription, no drift, nothing new invented.
 
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 
 const ROOT = path.resolve(__dirname, '..');
-const APP_JS = path.join(ROOT, 'app.js');
-
-function makeSandbox() {
-  const noop = () => {};
-  const sandbox = {
-    console,
-    Intl,
-    setTimeout,
-    clearTimeout,
-    setInterval,
-    clearInterval,
-    fetch: () => Promise.reject(new Error('fetch unavailable')),
-    addEventListener: noop,
-    removeEventListener: noop,
-    matchMedia: () => ({ matches: false, addListener: noop, removeListener: noop }),
-    requestAnimationFrame: (cb) => setTimeout(cb, 0),
-    cancelAnimationFrame: clearTimeout,
-    navigator: {},
-    location: { href: 'file:///index.html' },
-    localStorage: {
-      getItem: () => null,
-      setItem: noop,
-      removeItem: noop,
-    },
-    document: {
-      readyState: 'loading',
-      addEventListener: noop,
-      removeEventListener: noop,
-      querySelector: () => null,
-      querySelectorAll: () => [],
-      getElementById: () => null,
-      createElement: () => ({
-        style: {},
-        dataset: {},
-        classList: { add: noop, remove: noop, toggle: noop, contains: () => false },
-        setAttribute: noop,
-        appendChild: noop,
-        addEventListener: noop,
-      }),
-    },
-    lucide: { createIcons: noop, icons: {} },
-  };
-  sandbox.window = sandbox;
-  sandbox.self = sandbox;
-  sandbox.globalThis = sandbox;
-  return sandbox;
-}
-
-const CAPTURE = [
-  'BANK_OFFERS',
-  'BRANCH_DATA',
-  'HIDDEN_CHARGES',
-  'LOAN_TYPES',
-  'P2P_DEMO_REQUESTS',
-  'P2P_DEMO_LENDERS',
-];
+const DATA_JSON = path.join(ROOT, 'data', 'loanfinder-data.json');
 
 function loadFrontendData() {
-  if (!fs.existsSync(APP_JS)) {
-    throw new Error(`app.js not found at ${APP_JS}`);
+  if (!fs.existsSync(DATA_JSON)) {
+    throw new Error(`Canonical dataset not found at ${DATA_JSON}.`);
   }
-  const src = fs.readFileSync(APP_JS, 'utf8');
-  const sandbox = makeSandbox();
-  const capture = `\n;globalThis.__LF = { ${CAPTURE.join(', ')} };`;
-  vm.runInNewContext(src + capture, sandbox, { filename: 'app.js' });
-  const raw = sandbox.__LF;
+  const parsed = JSON.parse(fs.readFileSync(DATA_JSON, 'utf8'));
 
-  const required = ['BANK_OFFERS', 'BRANCH_DATA', 'HIDDEN_CHARGES', 'LOAN_TYPES'];
-  for (const key of required) {
-    if (raw[key] === undefined) {
-      throw new Error(`Failed to capture '${key}' from app.js`);
-    }
+  if (!Array.isArray(parsed.bankOffers) || typeof parsed.branchData !== 'object' || parsed.branchData === null) {
+    throw new Error('Unexpected data shape in canonical dataset');
   }
-  if (!Array.isArray(raw.BANK_OFFERS) || typeof raw.BRANCH_DATA !== 'object' || raw.BRANCH_DATA === null) {
-    throw new Error('Unexpected data shape captured from app.js');
+  if (typeof parsed.hiddenCharges !== 'object' || parsed.hiddenCharges === null) {
+    throw new Error('Unexpected hiddenCharges shape in canonical dataset');
   }
+
   return {
-    bankOffers: raw.BANK_OFFERS,
-    branchData: raw.BRANCH_DATA,
-    hiddenCharges: raw.HIDDEN_CHARGES,
-    loanTypes: raw.LOAN_TYPES,
-    p2pDemoRequests: raw.P2P_DEMO_REQUESTS || [],
-    p2pDemoLenders: raw.P2P_DEMO_LENDERS || [],
+    bankOffers: parsed.bankOffers,
+    branchData: parsed.branchData,
+    hiddenCharges: parsed.hiddenCharges,
+    loanTypes: parsed.loanTypes || [],
+    p2pDemoRequests: parsed.p2pDemoRequests || [],
+    p2pDemoLenders: parsed.p2pDemoLenders || [],
   };
 }
 
-module.exports = { loadFrontendData, CAPTURE };
+module.exports = { loadFrontendData };
 
 if (require.main === module) {
   const d = loadFrontendData();
@@ -110,6 +55,7 @@ if (require.main === module) {
   });
   const offers = d.bankOffers.reduce((a, o) => ((a[o.loanType] = (a[o.loanType] || 0) + 1), a), {});
   const hidden = Object.values(d.hiddenCharges).reduce((a, rows) => a + rows.length, 0);
+  console.log('canonical dataset:', path.relative(ROOT, DATA_JSON));
   console.log('offers:', offers);
   console.log('total offers:', d.bankOffers.length);
   console.log('branches per city:', perCity);

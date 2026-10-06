@@ -1,0 +1,1067 @@
+{
+  "schema": "loanfinder-dataset@1",
+  "source": "app.js (frontend source of truth, Phase 1)",
+  "generatedAt": "2026-10-06T14:56:56.278Z",
+  "bankOffers": [
+    {
+      "id": "sbi-home",
+      "bankName": "State Bank",
+      "shortCode": "SB",
+      "loanType": "Home Loan",
+      "loanTypeId": "home",
+      "interestRate": 7.85,
+      "processingFeePercent": 0.25,
+      "processingFeeMax": 10000,
+      "maxAmount": 15000000,
+      "maxTenure": 30,
+      "tag": "Lowest Advertised Rate",
+      "tagType": "success",
+      "badge": "Best Offer for You",
+      "color": "#2563eb",
+      "eligibility": "Salaried / Self-Employed with CIBIL > 750",
+      "minCreditScore": 750,
+      "minMonthly": 40000,
+      "allowedEmployment": [
+        "salaried",
+        "self-employed-professional",
+        "business-owner"
+      ],
+      "otherCharges": "Pre-closure: Nil for floating rates",
+      "lastUpdated": "Today"
+    },
+    {
+      "id": "hdfc-home",
+      "bankName": "HDFC Bank",
+      "shortCode": "HDFC",
+      "loanType": "Home Loan",
+      "loanTypeId": "home",
+      "interestRate": 8.1,
+      "processingFeePercent": 0.5,
+      "processingFeeMax": 15000,
+      "maxAmount": 20000000,
+      "maxTenure": 30,
+      "tag": "Popular Choice",
+      "tagType": "blue",
+      "badge": "Top Rated",
+      "color": "#004c8f",
+      "eligibility": "Min income ₹40,000/mo",
+      "minCreditScore": 700,
+      "minMonthly": 40000,
+      "allowedEmployment": [
+        "salaried",
+        "self-employed-professional",
+        "business-owner"
+      ],
+      "otherCharges": "Legal & technical fees at actuals",
+      "lastUpdated": "2 days ago"
+    },
+    {
+      "id": "icici-home",
+      "bankName": "ICICI Bank",
+      "shortCode": "ICICI",
+      "loanType": "Home Loan",
+      "loanTypeId": "home",
+      "interestRate": 8.35,
+      "processingFeePercent": 0.6,
+      "processingFeeMax": 20000,
+      "maxAmount": 30000000,
+      "maxTenure": 25,
+      "tag": "Instant In-Principle Sanction",
+      "tagType": "blue",
+      "badge": "Digital Sanction",
+      "color": "#bd241e",
+      "eligibility": "Age 21-65 years",
+      "minCreditScore": 700,
+      "minMonthly": 35000,
+      "allowedEmployment": [
+        "salaried",
+        "self-employed-professional",
+        "business-owner"
+      ],
+      "otherCharges": "Part-payment charges: Nil",
+      "lastUpdated": "Yesterday"
+    },
+    {
+      "id": "axis-home",
+      "bankName": "Axis Bank",
+      "shortCode": "AXIS",
+      "loanType": "Home Loan",
+      "loanTypeId": "home",
+      "interestRate": 8.4,
+      "processingFeePercent": 0.45,
+      "processingFeeMax": 12500,
+      "maxAmount": 15000000,
+      "maxTenure": 30,
+      "tag": "Fast Approval",
+      "tagType": "blue",
+      "badge": "Fast Track",
+      "color": "#97144d",
+      "eligibility": "Min salary ₹35,000/mo",
+      "minCreditScore": 700,
+      "minMonthly": 35000,
+      "allowedEmployment": [
+        "salaried",
+        "self-employed-professional",
+        "business-owner"
+      ],
+      "otherCharges": "Processing fee non-refundable",
+      "lastUpdated": "3 days ago"
+    },
+    {
+      "id": "kotak-home",
+      "bankName": "Kotak Mahindra",
+      "shortCode": "KM",
+      "loanType": "Home Loan",
+      "loanTypeId": "home",
+      "interestRate": 8.45,
+      "processingFeePercent": 0.5,
+      "processingFeeMax": 15000,
+      "maxAmount": 12000000,
+      "maxTenure": 25,
+      "tag": "Relationship Discount",
+      "tagType": "blue",
+      "badge": "Pre-Approved Offer",
+      "color": "#ed1c24",
+      "eligibility": "Existing customer benefits available",
+      "minCreditScore": 700,
+      "minMonthly": 30000,
+      "allowedEmployment": [
+        "salaried",
+        "self-employed-professional",
+        "business-owner"
+      ],
+      "otherCharges": "Inspection charges ₹2,500",
+      "lastUpdated": "4 days ago"
+    },
+    {
+      "id": "sbi-pers",
+      "bankName": "State Bank",
+      "shortCode": "SB",
+      "loanType": "Personal Loan",
+      "loanTypeId": "personal",
+      "interestRate": 10.25,
+      "processingFeePercent": 0.5,
+      "processingFeeMax": 5000,
+      "maxAmount": 2000000,
+      "maxTenure": 7,
+      "tag": "Lowest Personal Loan Rate",
+      "tagType": "success",
+      "badge": "Best Personal Rate",
+      "color": "#2563eb",
+      "eligibility": "Salaried with salary account in SBI",
+      "minCreditScore": 700,
+      "minMonthly": 25000,
+      "allowedEmployment": [
+        "salaried"
+      ],
+      "otherCharges": "Nil prepayment penalty after 1 yr",
+      "lastUpdated": "Today"
+    },
+    {
+      "id": "hdfc-pers",
+      "bankName": "HDFC Bank",
+      "shortCode": "HDFC",
+      "loanType": "Personal Loan",
+      "loanTypeId": "personal",
+      "interestRate": 10.5,
+      "processingFeePercent": 1,
+      "processingFeeMax": 4999,
+      "maxAmount": 4000000,
+      "maxTenure": 5,
+      "tag": "10-Sec Disbursal for Pre-Approved",
+      "tagType": "blue",
+      "badge": "Instant Money",
+      "color": "#004c8f",
+      "eligibility": "Salaried individuals with 2 yrs exp",
+      "minCreditScore": 700,
+      "minMonthly": 25000,
+      "allowedEmployment": [
+        "salaried"
+      ],
+      "otherCharges": "Stamp duty at actuals",
+      "lastUpdated": "Yesterday"
+    }
+  ],
+  "branchData": {
+    "Mumbai": [
+      {
+        "bank": "State Bank",
+        "name": "State Bank Main Branch - Nariman Point",
+        "address": "Madame Cama Road, Nariman Point, Mumbai, Maharashtra 400021",
+        "lat": 18.9272,
+        "lng": 72.8227,
+        "hours": "10:00 AM - 4:30 PM (Mon-Sat)",
+        "phone": "+91 22 2288 3456",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "State Bank",
+        "name": "State Bank Retail Hub - Bandra West",
+        "address": "Plot No. 14, Hill Road, Bandra West, Mumbai 400050",
+        "lat": 19.0544,
+        "lng": 72.8402,
+        "hours": "10:00 AM - 5:00 PM",
+        "phone": "+91 22 2640 1192",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "State Bank",
+        "name": "State Bank SME & Loan Hub - Andheri East",
+        "address": "Andheri Kurla Road, Chakala, Andheri East, Mumbai 400093",
+        "lat": 19.1136,
+        "lng": 72.8697,
+        "hours": "10:00 AM - 4:00 PM",
+        "phone": "+91 22 2838 5500",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "HDFC Bank",
+        "name": "HDFC Bank House - Senapati Bapat Marg",
+        "address": "Lower Parel West, Mumbai, Maharashtra 400013",
+        "lat": 18.9953,
+        "lng": 72.8315,
+        "hours": "9:30 AM - 4:30 PM",
+        "phone": "+91 22 6652 1000",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "ICICI Bank",
+        "name": "ICICI Bank Towers - BKC",
+        "address": "G Block, Bandra Kurla Complex, Bandra East, Mumbai 400051",
+        "lat": 19.0664,
+        "lng": 72.8687,
+        "hours": "9:30 AM - 5:00 PM",
+        "phone": "+91 22 3366 7777",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank Corporate Office - Worli",
+        "address": "5 Level, Axis House, C2, Wadia International Centre, Pandurang Budhkar Marg, Worli, Mumbai 400025",
+        "lat": 19.0127,
+        "lng": 72.8146,
+        "hours": "9:30 AM - 3:30 PM",
+        "phone": "+91 22 4325 1000",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank Loan Hub - Bandra Kurla Complex",
+        "address": "Plot C-6, G Block, Bandra Kurla Complex, Bandra East, Mumbai 400051",
+        "lat": 19.0675,
+        "lng": 72.868,
+        "hours": "9:30 AM - 4:00 PM",
+        "phone": "+91 22 6675 8800",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Kotak Mahindra",
+        "name": "Kotak Mahindra Bank - Fort Branch",
+        "address": "27BKC, 27th Road, Fort, Mumbai 400001",
+        "lat": 18.9322,
+        "lng": 72.8317,
+        "hours": "9:30 AM - 4:00 PM",
+        "phone": "+91 22 6605 6020",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Kotak Mahindra",
+        "name": "Kotak Infinity - Kamala Mills Compound",
+        "address": "Trade World, B Wing, Kamala Mills, Lower Parel, Mumbai 400013",
+        "lat": 19.0118,
+        "lng": 72.8273,
+        "hours": "9:30 AM - 5:00 PM (Mon-Fri)",
+        "phone": "+91 22 6605 7090",
+        "geoPrecision": "demo"
+      }
+    ],
+    "Delhi": [
+      {
+        "bank": "State Bank",
+        "name": "State Bank Connaught Place Zonal Hub",
+        "address": "11, Parliament Street, Connaught Place, New Delhi 110001",
+        "lat": 28.6297,
+        "lng": 77.2146,
+        "hours": "10:00 AM - 4:00 PM",
+        "phone": "+91 11 2374 8000",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "HDFC Bank",
+        "name": "HDFC Bank Retail Branch - South Extension",
+        "address": "F-41, South Extension Part 1, New Delhi 110049",
+        "lat": 28.5729,
+        "lng": 77.2223,
+        "hours": "9:30 AM - 4:30 PM",
+        "phone": "+91 11 4164 1234",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "ICICI Bank",
+        "name": "ICICI Bank - Nehru Place Branch",
+        "address": "B-26, Nehru Place, New Delhi 110019",
+        "lat": 28.5485,
+        "lng": 77.2524,
+        "hours": "9:30 AM - 5:00 PM",
+        "phone": "+91 11 3080 9898",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank - Connaught Place Branch",
+        "address": "11-K, Block, Connaught Place, New Delhi 110001",
+        "lat": 28.6315,
+        "lng": 77.2197,
+        "hours": "9:30 AM - 3:30 PM",
+        "phone": "+91 11 4306 7200",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank - Karol Bagh Home Financing Center",
+        "address": "8/38, WEA, Ajmal Khan Road, Karol Bagh, New Delhi 110005",
+        "lat": 28.6512,
+        "lng": 77.1901,
+        "hours": "9:30 AM - 4:00 PM",
+        "phone": "+91 11 4305 6600",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Kotak Mahindra",
+        "name": "Kotak Mahindra Bank - Connaught Place",
+        "address": "Antriksh Bhavan, 22 Kasturba Gandhi Marg, Connaught Place, New Delhi 110001",
+        "lat": 28.6289,
+        "lng": 77.2216,
+        "hours": "9:30 AM - 4:00 PM",
+        "phone": "+91 11 6606 6020",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "Kotak Mahindra",
+        "name": "Kotak Mahindra - Saket Retail Branch",
+        "address": "M-11, Saket, New Delhi 110017",
+        "lat": 28.5276,
+        "lng": 77.2148,
+        "hours": "9:30 AM - 5:00 PM (Mon-Fri)",
+        "phone": "+91 11 6606 6120",
+        "geoPrecision": "demo"
+      }
+    ],
+    "Bengaluru": [
+      {
+        "bank": "State Bank",
+        "name": "State Bank Local Head Office - St Marks Road",
+        "address": "65, St Marks Rd, Shanthala Nagar, Ashok Nagar, Bengaluru 560001",
+        "lat": 12.9716,
+        "lng": 77.6006,
+        "hours": "10:00 AM - 4:00 PM",
+        "phone": "+91 80 2594 3000",
+        "geoPrecision": "demo"
+      },
+      {
+        "bank": "State Bank",
+        "name": "State Bank Koramangala Branch",
+        "address": "80 Feet Road, 6th Block, Koramangala, Bengaluru 560095",
+        "lat": 12.9352,
+        "lng": 77.6245,
+        "hours": "10:00 AM - 4:00 PM",
+        "phone": "+91 80 2553 4567",
+        "geoPrecision": "demo"
+      }
+    ],
+    "Hyderabad": [
+      {
+        "bank": "State Bank",
+        "name": "State Bank Hyderabad Main Branch - Koti",
+        "address": "Bank Street, Koti, Hyderabad, Telangana 500095",
+        "lat": 17.443317,
+        "lng": 78.476855,
+        "hours": "10:30 AM - 4:30 PM (Mon-Sat)",
+        "phone": "040-24755767",
+        "ifsc": "SBIN0000847",
+        "source": "https://sbi.bank.in/documents/17826/2704985/012020-Hyderabad+Circle+%26+branches.xls",
+        "geoPrecision": "locality"
+      },
+      {
+        "bank": "HDFC Bank",
+        "name": "HDFC Bank - Banjara Hills",
+        "address": "No 6/3/248/1/1/A, Ground Floor, Bhaskar Plaza, Road No 1, Banjara Hills, Hyderabad 500034",
+        "lat": null,
+        "lng": null,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 1601",
+        "ifsc": "HDFC0000521",
+        "source": "https://www.hdfc.bank.in/branch-locator/telangana/hyderabad/hdfcbank-branch-banjarahills"
+      },
+      {
+        "bank": "HDFC Bank",
+        "name": "HDFC Bank - Gachibowli",
+        "address": "Plot No 79, Diamond Park, Vinayak Nagar, Gachibowli, Hyderabad 500032",
+        "lat": 17.447174,
+        "lng": 78.353796,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 1601",
+        "ifsc": "HDFC0000968",
+        "source": "https://www.hdfc.bank.in/branch-locator/telangana/hyderabad/hdfcbank-branch-gachibowli",
+        "geoPrecision": "locality"
+      },
+      {
+        "bank": "ICICI Bank",
+        "name": "ICICI Bank - Banjara Hills Road No 12",
+        "address": "No 514, Road No 12, Banjara Hills, Hyderabad 500034",
+        "lat": 17.4147728,
+        "lng": 78.4253186,
+        "hours": "9:30 AM - 3:00 PM (Mon-Sat)",
+        "phone": "1800 1080",
+        "ifsc": "ICIC0000382",
+        "source": "https://www.icici.bank.in/branch/telangana/hyderabad/icic0000382",
+        "geoPrecision": "locality"
+      },
+      {
+        "bank": "ICICI Bank",
+        "name": "ICICI Bank - Nanakramguda (Financial District)",
+        "address": "ICICI Bank Towers, Financial District, Plot No 12, Nanakramguda, Gachibowli, Hyderabad 500032",
+        "lat": 17.423079,
+        "lng": 78.336878,
+        "hours": "9:30 AM - 3:00 PM (Mon-Sat)",
+        "phone": "1800 1080",
+        "ifsc": "ICIC0004873",
+        "source": "https://www.icici.bank.in/branch/telangana/hyderabad/icic0004873",
+        "geoPrecision": "branch"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank - Banjara Hills Road No 2",
+        "address": "Unit No 1, Ground Floor, MCH No 8-2-273, 276 & 277, Pavani Avenue, Road No 2, Banjara Hills, Hyderabad 500034",
+        "lat": null,
+        "lng": null,
+        "hours": "9:30 AM - 3:30 PM (Mon-Sat)",
+        "phone": "1860 500 5555",
+        "ifsc": "UTIB0001379",
+        "source": "http://branch.axis.bank.in/axis-bank-road-no2-banjara-hills-bank-branch-hyderabad-telangana-38326/Home"
+      },
+      {
+        "bank": "Kotak Mahindra",
+        "name": "Kotak Mahindra Bank - Gachibowli",
+        "address": "Door No 1-13/2, 1-13/2/1, Kondapur Road, Gachibowli, Hyderabad 500032",
+        "lat": 17.456793,
+        "lng": 78.375834,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 4100",
+        "ifsc": "KKBK0000555",
+        "source": "https://www.kotak.bank.in/en/reach-us/detail/ifsc-code/hyderabad/hyderabad-gachibowli-kkbk0000555.html",
+        "geoPrecision": "locality"
+      }
+    ],
+    "Pune": [
+      {
+        "bank": "State Bank",
+        "name": "State Bank - Shivajinagar",
+        "address": "Showroom No 6, Ground Floor, Mayfair Tower, CTS No 28, Final Plot No 55, Shivajinagar, Pune 411005",
+        "lat": 18.536419,
+        "lng": 73.851137,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 11 2211",
+        "ifsc": "SBIN0018093",
+        "source": "public IFSC / RBI dataset (official SBI locator is JS-only)",
+        "geoPrecision": "locality"
+      },
+      {
+        "bank": "HDFC Bank",
+        "name": "HDFC Bank - Pimpri Camp",
+        "address": "PWD 24/9 & 24/10, Pimpri, Pune 411017",
+        "lat": null,
+        "lng": null,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 1601",
+        "ifsc": "HDFC0009507",
+        "source": "https://www.hdfc.bank.in/branch-locator/maharashtra/pune/hdfcbank-branch-pimpricamp"
+      },
+      {
+        "bank": "HDFC Bank",
+        "name": "HDFC Bank - East Street Camp",
+        "address": "No 2418, K P Housing Society, General Thimayya Road, East Street Camp, Pune 411001",
+        "lat": null,
+        "lng": null,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 1601",
+        "ifsc": "HDFC0000148",
+        "source": "https://www.hdfc.bank.in/branch-locator/maharashtra/pune/hdfcbank-branch-eaststreet"
+      },
+      {
+        "bank": "ICICI Bank",
+        "name": "ICICI Bank - Pune Camp",
+        "address": "No 233, Mahatma Gandhi Road, Camp, Pune 411001",
+        "lat": null,
+        "lng": null,
+        "hours": "9:30 AM - 3:00 PM (Mon-Sat)",
+        "phone": "1800 1080",
+        "ifsc": "ICIC0006488",
+        "source": "https://www.icici.bank.in/branch/maharashtra/pune/icic0006488"
+      },
+      {
+        "bank": "ICICI Bank",
+        "name": "ICICI Bank - Baner",
+        "address": "Showroom No 1 & 2, Aaiji Capital, Sr No 3/7, Baner Road, Pune 411045",
+        "lat": 18.554838,
+        "lng": 73.796144,
+        "hours": "9:30 AM - 3:00 PM (Mon-Sat)",
+        "phone": "1800 1080",
+        "ifsc": "ICIC0000985",
+        "source": "https://www.icici.bank.in/branch/maharashtra/pune/icic0000985",
+        "geoPrecision": "branch"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank - Pune Camp (East Street)",
+        "address": "Parmar House, 2413, East Street, General Thimayya Road, Camp, Pune 411001",
+        "lat": null,
+        "lng": null,
+        "hours": "9:30 AM - 3:30 PM (Mon-Sat)",
+        "phone": "1860 500 5555",
+        "ifsc": "UTIB0000305",
+        "source": "https://branch.axis.bank.in/"
+      },
+      {
+        "bank": "Axis Bank",
+        "name": "Axis Bank - Pune Main Branch (FC Road)",
+        "address": "Ground/First/Second Floor, Indra Pusti, 201/D/1, Fergusson College Road, Pune 411004",
+        "lat": 18.523109,
+        "lng": 73.841182,
+        "hours": "9:30 AM - 3:30 PM (Mon-Sat)",
+        "phone": "1860 500 5555",
+        "ifsc": "UTIB0000037",
+        "source": "https://branch.axis.bank.in/",
+        "geoPrecision": "locality"
+      },
+      {
+        "bank": "Kotak Mahindra",
+        "name": "Kotak Mahindra Bank - Fursungi",
+        "address": "Survey No 207, Hadapsar-Saswad Road, Opp SP Infocity, Fursungi, Pune 412308",
+        "lat": null,
+        "lng": null,
+        "hours": "10:00 AM - 4:00 PM (Mon-Sat)",
+        "phone": "1800 4100",
+        "ifsc": "KKBK0001784",
+        "source": "https://www.kotak.bank.in/"
+      }
+    ]
+  },
+  "hiddenCharges": {
+    "sbi-home": [
+      {
+        "icon": "file-text",
+        "name": "Legal & Technical Fees",
+        "desc": "Property valuation and vetting arranged by the bank, billed at actuals.",
+        "amount": "₹6,000-12,000",
+        "fee": 9000
+      },
+      {
+        "icon": "landmark",
+        "name": "Stamp Duty & Registration",
+        "desc": "Statutory state charges payable at the sub-registrar office, not included in the loan EMI.",
+        "amount": "~6% of loan",
+        "fee": 6,
+        "feePercent": true
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Charged per bounce when an EMI auto-debit or cheque fails.",
+        "amount": "₹500 + GST",
+        "fee": 500
+      },
+      {
+        "icon": "clock",
+        "name": "Late Payment Penalty",
+        "desc": "Nil during the 15-day grace period; overdue interest thereafter.",
+        "amount": "2% p.a.",
+        "fee": 2,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      },
+      {
+        "icon": "percent",
+        "name": "Rate Reset Basis",
+        "desc": "Interest resets periodically on the 1-year MCLR benchmark, so the advertised low rate is not locked.",
+        "amount": "1-Year MCLR",
+        "fee": 0,
+        "informational": true
+      }
+    ],
+    "hdfc-home": [
+      {
+        "icon": "file-text",
+        "name": "Legal & Technical Fees",
+        "desc": "Third-party verification charges payable before disbursal, at actuals.",
+        "amount": "₹10,000-25,000",
+        "fee": 17500
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Levied each time an EMI collection attempt fails.",
+        "amount": "₹500 + GST",
+        "fee": 500
+      },
+      {
+        "icon": "clock",
+        "name": "Late Payment Penalty",
+        "desc": "Overdue interest plus a fixed handling charge on each delayed EMI.",
+        "amount": "2% p.a. + ₹850",
+        "fee": 850,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      },
+      {
+        "icon": "percent",
+        "name": "Foreclosure on Fixed Rate",
+        "desc": "Floating loans have nil foreclosure; fixed-rate loans attract a closing fee.",
+        "amount": "Up to 5%",
+        "fee": 5,
+        "feePercent": true,
+        "appliesTo": "foreclosure"
+      },
+      {
+        "icon": "hand-coins",
+        "name": "Rate Conversion Fee",
+        "desc": "Switching between the anchoring scheme and the base rate scheme is charged.",
+        "amount": "₹5,000",
+        "fee": 5000
+      }
+    ],
+    "icici-home": [
+      {
+        "icon": "file-text",
+        "name": "Legal & Vetting Fees",
+        "desc": "Independent legal opinion and valuation by empanelled vendors, billed at actuals.",
+        "amount": "₹12,000-35,000",
+        "fee": 23500
+      },
+      {
+        "icon": "landmark",
+        "name": "Stamp Duty & Registration",
+        "desc": "Arranged via empanelled agents with an admin convenience charge.",
+        "amount": "~6% of loan",
+        "fee": 6,
+        "feePercent": true
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Per failed EMI collection attempt.",
+        "amount": "₹550 + GST",
+        "fee": 550
+      },
+      {
+        "icon": "percent",
+        "name": "Foreclosure on Fixed Rate",
+        "desc": "Nil for floating-rate loans; fixed-rate loans attract a closing fee.",
+        "amount": "Up to 4%",
+        "fee": 4,
+        "feePercent": true,
+        "appliesTo": "foreclosure"
+      },
+      {
+        "icon": "clock",
+        "name": "Delayed Payment Interest",
+        "desc": "Beyond the grace period, overdue amount is re-priced.",
+        "amount": "2% p.a.",
+        "fee": 2,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      }
+    ],
+    "axis-home": [
+      {
+        "icon": "file-text",
+        "name": "Legal & Technical Fees",
+        "desc": "Billed at actuals on confirmation of the property and loan disbursal plan.",
+        "amount": "₹10,000-20,000",
+        "fee": 15000
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Charged when an EMI auto-debit attempt fails.",
+        "amount": "₹650 + GST",
+        "fee": 650
+      },
+      {
+        "icon": "percent",
+        "name": "Prepayment / Foreclosure",
+        "desc": "Floating-rate loans have nil foreclosure; closed loans attract a fee.",
+        "amount": "2-4%",
+        "fee": 3,
+        "feePercent": true,
+        "appliesTo": "foreclosure"
+      },
+      {
+        "icon": "refresh-cw",
+        "name": "Rate Conversion Fee",
+        "desc": "One-time fee to convert from the anchoring scheme to the floating scheme.",
+        "amount": "Up to 0.5% of O/S",
+        "fee": 0.5,
+        "feePercent": true,
+        "appliesTo": "conversion"
+      },
+      {
+        "icon": "clock",
+        "name": "Penal Interest",
+        "desc": "On very delayed EMIs, the overdue portion is re-priced upwards.",
+        "amount": "2% p.a.",
+        "fee": 2,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      }
+    ],
+    "kotak-home": [
+      {
+        "icon": "file-text",
+        "name": "Legal & AMS Fees",
+        "desc": "Property appraisal and management services billed at actuals.",
+        "amount": "₹8,000-15,000",
+        "fee": 11500
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Per failed EMI collection attempt.",
+        "amount": "₹590 + GST",
+        "fee": 590
+      },
+      {
+        "icon": "percent",
+        "name": "Prepayment / Foreclosure",
+        "desc": "Nil for floating loans closed from own funds after 6 months; fixed loans attract a fee.",
+        "amount": "Up to 3%",
+        "fee": 3,
+        "feePercent": true,
+        "appliesTo": "foreclosure"
+      },
+      {
+        "icon": "clipboard-list",
+        "name": "Duplicate Statement / Certificates",
+        "desc": "Charged per physical copy beyond the free digital statements.",
+        "amount": "₹200 / copy",
+        "fee": 200
+      },
+      {
+        "icon": "clock",
+        "name": "Penal Interest",
+        "desc": "Applied to overdue EMIs after the grace period.",
+        "amount": "2% p.a.",
+        "fee": 2,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      }
+    ],
+    "sbi-pers": [
+      {
+        "icon": "timer",
+        "name": "Rate Hold Fee",
+        "desc": "Holding the sanctioned rate beyond the validity window is charged.",
+        "amount": "0.25% of amount",
+        "fee": 0.25,
+        "feePercent": true,
+        "appliesTo": "conversion"
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Per failed EMI collection attempt.",
+        "amount": "₹500 + GST",
+        "fee": 500
+      },
+      {
+        "icon": "percent",
+        "name": "Prepayment Charges",
+        "desc": "Waived only if closed from own funds after 4 years; earlier closure billed.",
+        "amount": "2% + GST",
+        "fee": 2,
+        "feePercent": true,
+        "appliesTo": "foreclosure"
+      },
+      {
+        "icon": "clock",
+        "name": "Overdue Interest",
+        "desc": "Delayed EMIs are re-priced to a penal rate.",
+        "amount": "24% p.a.",
+        "fee": 24,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      },
+      {
+        "icon": "file-text",
+        "name": "Duplicate Statement",
+        "desc": "Physical duplicate or transaction certificate.",
+        "amount": "₹350 / copy",
+        "fee": 350
+      }
+    ],
+    "hdfc-pers": [
+      {
+        "icon": "percent",
+        "name": "Prepayment / Early Closure",
+        "desc": "Billed when the loan is closed in the first 4 years.",
+        "amount": "4% + GST",
+        "fee": 4,
+        "feePercent": true,
+        "appliesTo": "foreclosure"
+      },
+      {
+        "icon": "alert-triangle",
+        "name": "EMI Bounce / Cheque Return",
+        "desc": "Per failed EMI collection attempt.",
+        "amount": "₹550 + GST",
+        "fee": 550
+      },
+      {
+        "icon": "door-open",
+        "name": "Doorstep Service Fee",
+        "desc": "Charged for doorstep document pickup or disbursal cancellation requests.",
+        "amount": "₹500 / visit",
+        "fee": 500
+      },
+      {
+        "icon": "clock",
+        "name": "Late Payment Penalty",
+        "desc": "Delayed EMIs are re-priced to a penal rate.",
+        "amount": "21-24% p.a.",
+        "fee": 22.5,
+        "feePercent": true,
+        "appliesTo": "overdue"
+      },
+      {
+        "icon": "file-text",
+        "name": "Duplicate Statement",
+        "desc": "Beyond the free monthly statements.",
+        "amount": "₹250 / copy",
+        "fee": 250
+      }
+    ]
+  },
+  "loanTypes": [
+    {
+      "id": "home",
+      "name": "Home Loan",
+      "icon": "home",
+      "startingRate": "7.85% p.a.",
+      "popular": true,
+      "comingSoon": false
+    },
+    {
+      "id": "personal",
+      "name": "Personal Loan",
+      "icon": "wallet",
+      "startingRate": "10.25% p.a.",
+      "popular": true,
+      "comingSoon": false
+    },
+    {
+      "id": "car",
+      "name": "Car Loan",
+      "icon": "car",
+      "startingRate": null,
+      "popular": false,
+      "comingSoon": true
+    },
+    {
+      "id": "education",
+      "name": "Education Loan",
+      "icon": "graduation-cap",
+      "startingRate": null,
+      "popular": false,
+      "comingSoon": true
+    },
+    {
+      "id": "business",
+      "name": "Business Loan",
+      "icon": "building-2",
+      "startingRate": null,
+      "popular": false,
+      "comingSoon": true
+    },
+    {
+      "id": "gold",
+      "name": "Gold Loan",
+      "icon": "gem",
+      "startingRate": null,
+      "popular": false,
+      "comingSoon": true
+    }
+  ],
+  "p2pDemoRequests": [
+    {
+      "id": "p2p-r1",
+      "borrowerName": "Priya Sharma",
+      "initials": "PS",
+      "avatarColor": "#2563eb",
+      "purpose": "Medical Emergency",
+      "amount": 80000,
+      "funded": 0,
+      "rate": 11.5,
+      "tenureMonths": 12,
+      "monthlyIncome": 48000,
+      "employmentType": "Salaried - IT Professional",
+      "creditScore": 745,
+      "risk": "Medium",
+      "description": "Need urgent funds for my father’s surgery. Will repay in 12 monthly installments from my salary.",
+      "repaymentDate": "5th of every month",
+      "requestedDate": "2 days ago",
+      "status": "open",
+      "isMine": false
+    },
+    {
+      "id": "p2p-r2",
+      "borrowerName": "Rohit Mehta",
+      "initials": "RM",
+      "avatarColor": "#7c3aed",
+      "purpose": "Wedding Expenses",
+      "amount": 150000,
+      "funded": 0,
+      "rate": 12,
+      "tenureMonths": 24,
+      "monthlyIncome": 62000,
+      "employmentType": "Salaried - Banking",
+      "creditScore": 700,
+      "risk": "Medium",
+      "description": "Organizing my wedding next month. Loan will be repaid from salary over two years.",
+      "repaymentDate": "10th of every month",
+      "requestedDate": "5 days ago",
+      "status": "open",
+      "isMine": false
+    },
+    {
+      "id": "p2p-r3",
+      "borrowerName": "Ananya Iyer",
+      "initials": "AI",
+      "avatarColor": "#0891b2",
+      "purpose": "Business Expansion",
+      "amount": 200000,
+      "funded": 0,
+      "rate": 13.5,
+      "tenureMonths": 18,
+      "monthlyIncome": 85000,
+      "employmentType": "Self-Employed - Boutique Owner",
+      "creditScore": 690,
+      "risk": "High",
+      "description": "Expanding my boutique and adding an online store. Stable revenue, need working capital.",
+      "repaymentDate": "15th of every month",
+      "requestedDate": "Today",
+      "status": "open",
+      "isMine": false
+    },
+    {
+      "id": "p2p-r4",
+      "borrowerName": "Vikram Singh",
+      "initials": "VS",
+      "avatarColor": "#059669",
+      "purpose": "Education Fees",
+      "amount": 100000,
+      "funded": 100000,
+      "rate": 10.5,
+      "tenureMonths": 12,
+      "monthlyIncome": 55000,
+      "employmentType": "Salaried - Engineer",
+      "creditScore": 780,
+      "risk": "Low",
+      "description": "Funding my daughter’s engineering semester fees. Loan sanctioned and currently in repayment.",
+      "repaymentDate": "1st of every month",
+      "requestedDate": "1 week ago",
+      "status": "repaying",
+      "isMine": false
+    },
+    {
+      "id": "p2p-r5",
+      "borrowerName": "Sneha Kulkarni",
+      "initials": "SK",
+      "avatarColor": "#d97706",
+      "purpose": "Home Renovation",
+      "amount": 60000,
+      "funded": 0,
+      "rate": 11,
+      "tenureMonths": 9,
+      "monthlyIncome": 40000,
+      "employmentType": "Salaried - Teacher",
+      "creditScore": 730,
+      "risk": "Medium",
+      "description": "Renovating my kitchen and bathroom. Prefer to borrow rather than touch savings.",
+      "repaymentDate": "5th of every month",
+      "requestedDate": "3 days ago",
+      "status": "open",
+      "isMine": false
+    },
+    {
+      "id": "p2p-u1",
+      "borrowerName": "Alex Johnson",
+      "initials": "AJ",
+      "avatarColor": "#2563eb",
+      "purpose": "Home Renovation",
+      "amount": 120000,
+      "funded": 110000,
+      "rate": 10.8,
+      "tenureMonths": 12,
+      "monthlyIncome": 79000,
+      "employmentType": "Salaried - Product Manager",
+      "creditScore": 760,
+      "risk": "Low",
+      "description": "Seeded demo request: repaying a home renovation loan with one lender.",
+      "repaymentDate": "5th of every month",
+      "requestedDate": "3 weeks ago",
+      "status": "repaying",
+      "isMine": true,
+      "lenderName": "Rahul Verma"
+    }
+  ],
+  "p2pDemoLenders": [
+    {
+      "name": "Rahul Verma",
+      "initials": "RV",
+      "minAmount": 20000,
+      "maxAmount": 200000,
+      "maxRate": 12,
+      "risk": [
+        "low",
+        "medium"
+      ],
+      "tenureMax": 24
+    },
+    {
+      "name": "Kavita Reddy",
+      "initials": "KR",
+      "minAmount": 10000,
+      "maxAmount": 150000,
+      "maxRate": 12,
+      "risk": [
+        "low"
+      ],
+      "tenureMax": 12
+    },
+    {
+      "name": "Neha Gupta",
+      "initials": "NG",
+      "minAmount": 5000,
+      "maxAmount": 50000,
+      "maxRate": 13,
+      "risk": [
+        "low",
+        "medium"
+      ],
+      "tenureMax": 18
+    },
+    {
+      "name": "Amit Thakur",
+      "initials": "AT",
+      "minAmount": 25000,
+      "maxAmount": 300000,
+      "maxRate": 16,
+      "risk": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "tenureMax": 36
+    }
+  ]
+}

@@ -118,6 +118,8 @@ function normalize(frontend) {
         fee_text: h.amount ?? null,
         fee: typeof h.fee === 'number' ? h.fee : null,
         fee_percent: h.feePercent ? 1 : 0,
+        icon: h.icon ?? null,
+        informational: h.informational ? 1 : 0,
       });
     }
   }
