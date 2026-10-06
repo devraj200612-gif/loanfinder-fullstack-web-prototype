@@ -1,16 +1,17 @@
-// LoanFinder API - Phase 2A backend foundation.
+// LoanFinder API - Phase 2A/2C backend.
 //
-// Scope (Phase 2A only): a minimal Express server with a health endpoint and
-// static serving of the existing Phase 1 frontend. No database, no REST data
-// APIs, no authentication - those arrive in later phases.
-//
-// The Phase 1 frontend is untouched: it still runs from file:// and still uses
-// localStorage. Serving it here is additive, so opening http://localhost:8080
-// shows exactly the same app.
+// Scope: a minimal Express server with a health endpoint (Phase 2A) plus a
+// read-only REST data layer on top of the Phase 2B SQLite database (Phase 2C).
+// No write endpoints, no authentication. Static serving of the existing Phase 1
+// frontend remains additive: the frontend still runs from file://, still uses
+// its own BANK_OFFERS / BRANCH_DATA / localStorage and is NOT migrated to these
+// APIs yet (that is Phase 2D).
 'use strict';
 
 const path = require('path');
 const express = require('express');
+
+const apiRouter = require('./src/routes/api');
 
 const ROOT = __dirname;
 const DEFAULT_PORT = 8080;
@@ -19,7 +20,7 @@ const app = express();
 app.disable('x-powered-by');
 
 // ---------------------------------------------------------------------------
-// Health endpoint (the only API route in Phase 2A).
+// Health endpoint (Phase 2A contract, unchanged).
 // ---------------------------------------------------------------------------
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'LoanFinder API' });
@@ -42,6 +43,11 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(ROOT, { index: 'index.html', dotfiles: 'ignore', fallthrough: true }));
+
+// ---------------------------------------------------------------------------
+// Read-only data API (Phase 2C: banks, loan offers, branches, hidden charges).
+// ---------------------------------------------------------------------------
+app.use('/api', apiRouter);
 
 // ---------------------------------------------------------------------------
 // 404 for unknown routes (API and everything else).
