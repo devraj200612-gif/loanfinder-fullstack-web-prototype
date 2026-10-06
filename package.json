@@ -4,6 +4,7 @@
   "private": true,
   "description": "Loan comparison, P2P lending and branch discovery prototype (static browser app)",
   "scripts": {
+    "start": "node server.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
@@ -15,6 +16,7 @@
     "report:status": "node generate_report.js"
   },
   "dependencies": {
+    "express": "^5.2.1",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.3.11"
   },
