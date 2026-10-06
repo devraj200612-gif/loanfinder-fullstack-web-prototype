@@ -12,10 +12,14 @@
     "test:regression": "playwright test tests/regression.spec.js",
     "test:map": "playwright test tests/map.spec.js tests/map-pixels.spec.js tests/geo-branch.spec.js",
     "test:p2p": "playwright test tests/p2p-overflow.spec.js",
+    "db:init": "node scripts/init-db.js",
+    "db:validate": "node scripts/validate-db.js",
+    "db:extract": "node scripts/extract-app-data.js",
     "report:complete": "node generate_complete_report.js",
     "report:status": "node generate_report.js"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "express": "^5.2.1",
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.3.11"

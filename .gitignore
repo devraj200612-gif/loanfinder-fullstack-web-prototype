@@ -7,6 +7,11 @@ playwright-report/
 blob-report/
 .playwright-artifacts*/
 
+# Generated SQLite database - recreated locally with `npm run db:init`.
+# The seed is reproducible; the binary file must never be committed.
+data/*.sqlite*
+data/*.db
+
 # OS / editor noise
 Thumbs.db
 .DS_Store
