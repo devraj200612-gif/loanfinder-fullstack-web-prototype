@@ -64,7 +64,11 @@ function main() {
   const existing = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((r) => r.name));
   for (const t of requiredTables) record(`table '${t}' exists`, existing.has(t));
   const extra = Array.from(existing).filter((t) => !t.startsWith('sqlite_') && !requiredTables.includes(t));
-  if (extra.length) record('no unexpected tables', false, extra.join(', '));
+  // Phase 2E adds migration/runtime tables. These are expected now.
+  const allowedExtras = new Set(['schema_migrations', 'users', 'sessions', 'saved_offers']);
+  const unexpected = extra.filter((t) => !allowedExtras.has(t));
+  if (unexpected.length) record('no unexpected tables', false, unexpected.join(', '));
+  else record('no unexpected tables', true, extra.length ? extra.join(', ') : '');
 
   // ---- 2. counts ----
   const counts = {
