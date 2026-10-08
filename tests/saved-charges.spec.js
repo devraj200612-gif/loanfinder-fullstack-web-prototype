@@ -1,6 +1,16 @@
-// Saved offers (persisted to localStorage) and the hidden-charges module.
+// Saved offers (Phase 2E: persisted per account via /api/saved-offers, i.e. in
+// the SQLite database) and the hidden-charges module.
 const { test, expect } = require('@playwright/test');
 const { collectErrors, launchApp, navigate, findMatchingLoans } = require('./helpers');
+
+// Reads the offer id wired to a given Save button so the assertions below can
+// check the API state of exactly the offer the click toggles.
+async function saveButtonOfferId(btn) {
+  return btn.evaluate(el => {
+    const m = (el.getAttribute('onclick') || '').match(/toggleSaveOffer\('([^']+)'\)/);
+    return m ? m[1] : null;
+  });
+}
 
 test.describe('saved offers', () => {
   test('an offer can be saved and survives a page reload', async ({ page }) => {
@@ -8,25 +18,30 @@ test.describe('saved offers', () => {
     await launchApp(page);
     await findMatchingLoans(page);
 
-    // Find a save button that is not already in the saved state.
+    // Find a save button and read the offer it toggles.
     const btn = page.locator('button[title="Save Offer"]').first();
     await expect(btn).toBeVisible();
+    const offerId = await saveButtonOfferId(btn);
+    expect(offerId).toBeTruthy();
 
-    const savedBefore = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem('loanfinder.db.v1') || '{}').savedOffers || []);
+    const inApi = id => page.evaluate(async offerId =>
+      (await window.LoanFinderAPI.getSavedOffers()).some(r => r.offer_id === offerId), id);
+
+    const savedBefore = await inApi(offerId);
     await btn.click();
     await page.waitForTimeout(600);
-    const savedAfter = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem('loanfinder.db.v1') || '{}').savedOffers || []);
 
-    // Exactly one toggle happened, in whichever direction.
-    expect(savedAfter.length).toBe(savedBefore.length === 0 ? 1 : savedBefore.length - 1);
+    // Exactly one toggle happened, confirmed by the server, not local state.
+    expect(await inApi(offerId)).toBe(!savedBefore);
+    // The rendered Saved view reflects the same toggle.
+    const uiSaved = await page.evaluate(id =>
+      (window.app.savedOffers || []).some(o => o.id === id), offerId);
+    expect(uiSaved).toBe(!savedBefore);
 
     await page.reload();
-    await page.waitForTimeout(1000);
-    const savedAfterReload = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem('loanfinder.db.v1') || '{}').savedOffers || []);
-    expect(savedAfterReload).toEqual(savedAfter);
+    await page.waitForSelector('button:has-text("Start Comparing Free")');
+    // The session survives the reload and the offer is still in the database.
+    expect(await inApi(offerId)).toBe(!savedBefore);
 
     expect(errors).toEqual([]);
   });
@@ -40,22 +55,28 @@ test.describe('saved offers', () => {
     // either a saved entry or an explicit empty state, but never broken markup
     expect(text.length).toBeGreaterThan(0);
     expect(text).toMatch(/saved/i);
+    // Whatever the Saved view shows must come from the API, not a local seed.
+    expect(await page.evaluate(async () => {
+      const api = (await window.LoanFinderAPI.getSavedOffers()).map(r => r.offer_id).sort();
+      const ui = (window.app.savedOffers || []).map(o => o.id).sort();
+      return JSON.stringify(api) === JSON.stringify(ui);
+    })).toBe(true);
   });
 
   test('toggling the same offer twice restores the original state', async ({ page }) => {
     await launchApp(page);
     await findMatchingLoans(page);
-    const read = () => page.evaluate(() =>
-      // compare as a set: toggling off then on re-appends the offer, so the
-      // stored order legitimately differs while the contents are restored.
-      (JSON.parse(localStorage.getItem('loanfinder.db.v1') || '{}').savedOffers || [])
-        .map(o => o.id).sort());
 
-    const before = await read();
     const btn = page.locator('button[title="Save Offer"]').first();
+    const offerId = await saveButtonOfferId(btn);
+    const inApi = id => page.evaluate(async offerId =>
+      (await window.LoanFinderAPI.getSavedOffers()).some(r => r.offer_id === offerId), id);
+
+    const before = await inApi(offerId);
     await btn.click(); await page.waitForTimeout(500);
+    expect(await inApi(offerId)).toBe(!before);
     await btn.click(); await page.waitForTimeout(500);
-    expect(await read()).toEqual(before);
+    expect(await inApi(offerId)).toBe(before);
   });
 });
 

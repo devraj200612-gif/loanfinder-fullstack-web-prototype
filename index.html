@@ -174,8 +174,8 @@
         </div>
         <div class="landing-feature-card">
           <div class="feature-icon bg-sky-50 text-sky-600"><i data-lucide="shield-check"></i></div>
-          <h3>Your Data Stays Local</h3>
-          <p>This demo keeps your loan details in your browser and asks for no real credentials. Only the branch map contacts a server, to load public OpenStreetMap tiles.</p>
+          <h3>Your Account Stays Private</h3>
+          <p>Passwords are hashed on our server and never shown back. Saved offers live in your account; other loan details stay in your browser.</p>
         </div>
       </div>
     </section>
@@ -290,13 +290,13 @@
       <!-- User Mini Profile & Logout -->
       <div class="sidebar-footer">
         <div class="user-info">
-          <div class="avatar">AJ</div>
+          <div class="avatar" id="sidebar-avatar">G</div>
           <div class="user-meta">
-            <div class="user-name">Alex Johnson</div>
-            <div class="user-email">alex.j@example.com</div>
+            <div class="user-name" id="sidebar-user-name">Guest</div>
+            <div class="user-email" id="sidebar-user-email">Not signed in</div>
           </div>
         </div>
-        <button class="logout-btn" id="logout-btn" title="Log Out">
+        <button class="logout-btn" id="logout-btn" title="Sign In" aria-label="Sign In">
           <i data-lucide="log-out"></i>
         </button>
       </div>
@@ -322,9 +322,9 @@
             <span class="notification-dot"></span>
           </button>
           <div class="topbar-user">
-            <div class="topbar-avatar">AJ</div>
+            <div class="topbar-avatar" id="topbar-avatar">G</div>
             <div class="topbar-user-info">
-              <span class="topbar-user-name">Alex Johnson</span>
+              <span class="topbar-user-name" id="topbar-user-name">Guest</span>
               <span class="topbar-user-sub">Loan Explorer</span>
             </div>
           </div>
@@ -856,20 +856,20 @@
           <div class="profile-grid">
             <div class="card p-6">
               <div class="flex items-center gap-4 mb-6">
-                <div class="avatar-xl">AJ</div>
+                <div class="avatar-xl" id="profile-avatar">G</div>
                 <div>
-                  <h3 class="text-xl font-bold">Alex Johnson</h3>
-                  <p class="text-slate-500 text-sm">Member since March 2026 &bull; Verified Borrower</p>
+                  <h3 class="text-xl font-bold" id="profile-heading">Guest</h3>
+                  <p class="text-slate-500 text-sm" id="profile-member-line">Not signed in &bull; Browsing as a guest</p>
                 </div>
               </div>
               <div class="form-grid">
                 <div class="form-group">
                   <label for="profile-full-name">Full Name</label>
-                  <input type="text" class="form-input" id="profile-full-name" value="Alex Johnson" />
+                  <input type="text" class="form-input" id="profile-full-name" value="" />
                 </div>
                 <div class="form-group">
                   <label for="profile-email">Email Address</label>
-                  <input type="email" class="form-input" id="profile-email" value="alex.j@example.com" />
+                  <input type="email" class="form-input" id="profile-email" value="" />
                 </div>
                 <div class="form-group">
                   <label for="profile-phone">Primary Phone</label>
@@ -1039,7 +1039,7 @@
             <div class="flex-between mb-4">
               <div>
                 <h3 class="font-bold text-slate-900">Demo Data</h3>
-                <p class="text-xs text-slate-500">Restore the original seeded banks, P2P listings and saved offers. All local demo changes are wiped.</p>
+                <p class="text-xs text-slate-500">Restore the original seeded banks and P2P listings. Local demo changes are wiped &mdash; saved offers in your account are kept on the server.</p>
               </div>
             </div>
             <button class="btn btn-outline" onclick="app.resetDemoData()">
@@ -1510,15 +1510,15 @@
           <form id="auth-login-form" class="auth-form mt-6" onsubmit="event.preventDefault(); app.handleAuthSuccess();">
             <div class="form-group mb-3">
               <label for="login-email">Email or Username</label>
-              <input type="email" id="login-email" class="form-input" placeholder="name@example.com" required value="alex.j@example.com" />
+              <input type="email" id="login-email" class="form-input" placeholder="name@example.com" required />
             </div>
             <div class="form-group mb-3">
               <div class="flex-between">
                 <label for="login-password">Password</label>
-                <a href="#" class="text-xs text-blue-600 hover:underline" onclick="event.preventDefault(); toast('Password reset needs a server, which this prototype does not have yet.'); return false;">Forgot password?</a>
+                <a href="#" class="text-xs text-blue-600 hover:underline" onclick="event.preventDefault(); toast('Password reset is not available yet.'); return false;">Forgot password?</a>
               </div>
               <div class="password-field">
-                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required value="password123" />
+                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required />
                 <button type="button" class="password-toggle" onclick="app.togglePassword(this)" aria-label="Show password">
                   <i data-lucide="eye"></i>
                 </button>
@@ -1584,7 +1584,10 @@
           </div>
 
           <div class="auth-footer text-center mt-5">
-            <span class="text-xs text-slate-500">Prototype build — no server, so nothing you type is transmitted or stored</span>
+            <button type="button" class="btn btn-outline w-full py-2.5 mb-3" id="auth-guest-btn" onclick="app.continueAsGuest()">
+              Continue as guest
+            </button>
+            <span class="text-xs text-slate-500">Accounts and saved offers are stored securely on this server &mdash; passwords are never displayed.</span>
           </div>
         </div>
       </div>

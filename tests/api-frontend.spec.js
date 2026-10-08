@@ -3,7 +3,7 @@
 // from the Phase 2C REST API, with an explicit loading state and an honest
 // failure + Retry path when the API is unreachable.
 const { test, expect } = require('@playwright/test');
-const { REGRESSION, collectErrors, launchApp, navigate, findMatchingLoans } = require('./helpers');
+const { REGRESSION, collectErrors, ensureDemoUser, launchApp, navigate, findMatchingLoans } = require('./helpers');
 
 const API_COUNTS = { offers: 7, banks: 5, branches: 33 };
 
@@ -76,10 +76,16 @@ test.describe('Phase 2D: frontend loads its data from the API over HTTP', () => 
     ['State Bank', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra']
       .forEach(b => expect(optionsText).toContain(b));
 
-    // The demo saved-offers seed came from the API-backed BANK_OFFERS.
-    const seeds = await page.evaluate(() =>
-      (JSON.parse(localStorage.getItem('loanfinder.db.v1') || '{}').savedOffers || []).map(o => o.id).sort());
-    expect(seeds).toEqual(['hdfc-pers', 'sbi-home']);
+    // Phase 2E: saved offers are account data - the Saved view is driven by
+    // GET /api/saved-offers for the signed-in demo user, never by a local
+    // localStorage seed, so the rendered list must equal the API rows exactly.
+    const saved = await page.evaluate(async () => ({
+      api: (await window.LoanFinderAPI.getSavedOffers()).map(r => r.offer_id).sort(),
+      ui: (window.app.savedOffers || []).map(o => o.id).sort(),
+      localSeed: (JSON.parse(localStorage.getItem('loanfinder.db.v1') || '{}').savedOffers || []).map(o => o.id).sort(),
+    }));
+    expect(saved.ui).toEqual(saved.api);
+    expect(saved.localSeed).toEqual([]);
 
     // No boot/console errors during the whole walkthrough.
   });
@@ -184,6 +190,9 @@ test.describe('Phase 2D: frontend loads its data from the API over HTTP', () => 
   });
 
   test('a dead API shows an explicit error + Retry that recovers', async ({ page }) => {
+    // Create the demo account first: after Phase 2E the sign-in form talks to
+    // the real API, and the routes below abort every /api/** call.
+    await ensureDemoUser(page);
     await page.route('**/api/**', route => route.abort('failed'));
     await page.goto('http://127.0.0.1:8080/');
     await expect(page.locator('#boot-overlay:not(.boot-hidden)')).toBeVisible();

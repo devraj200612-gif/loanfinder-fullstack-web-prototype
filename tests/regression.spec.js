@@ -44,7 +44,7 @@ test.describe('critical regression: the documented loan-matching flow', () => {
     expect(errors, 'no console or page errors during the flow').toEqual([]);
   });
 
-test('top match is State Bank at 100% with the correct rate and EMI', async ({ page }) => {
+  test('top three matches are State Bank 100%, HDFC 73% and Axis 55%', async ({ page }) => {
     const errors = collectErrors(page);
     await launchApp(page);
     await findMatchingLoans(page);
@@ -54,6 +54,14 @@ test('top match is State Bank at 100% with the correct rate and EMI', async ({ p
     expect(text).toContain('7.85%');           // advertised rate
     expect(text).toContain('100% Match');      // best possible score
     expect(text).toContain('28,950');          // Rs 35,00,000 @ 7.85% over 20y
+    // The documented fixture's full ranking: HDFC Bank second at 73% (8.1%,
+    // EMI 29,494) and Axis Bank third at 55% (8.4%, EMI 30,153).
+    expect(text).toContain('HDFC Bank');
+    expect(text).toContain('73% Match');
+    expect(text).toContain('29,494');
+    expect(text).toContain('Axis Bank');
+    expect(text).toContain('55% Match');
+    expect(text).toContain('30,153');
     expect(errors, 'no console or page errors').toEqual([]);
   });
 

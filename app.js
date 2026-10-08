@@ -14,7 +14,12 @@ const appState = {
   employmentType: 'salaried',
   creditScore: 780,
   activeBankDetails: null,
+  // Phase 2E: the signed-in account (null = guest) and the server-side saved
+  // offers for that account (offer objects for rendering + the saved_offers
+  // row id per offer id, needed for DELETE /api/saved-offers/:id).
+  currentUser: null,
   savedOffers: [],
+  savedOfferRowIds: {},
   savedP2PRequests: [],
   activeBranchCity: 'Mumbai',
   activeBranchBank: 'State Bank',
@@ -466,14 +471,24 @@ window.app = {
   get map() { return appState.mapGL || appState.mapGoogle || appState.mapInstance || null; },
   get mapStyle() { return appState.mapStyle; },
 
+  // Phase 2E: read-only access to the signed-in account (null = guest) and the
+  // saved offers currently shown, so the browser tests can assert what the UI
+  // is actually rendering.
+  get currentUser() { return appState.currentUser; },
+  get savedOffers() { return appState.savedOffers; },
+
   init() {
     // Phase 2D: the app now reads its catalogue data from the Phase 2C REST API
     // at boot instead of inline constants. Show a loading state, fetch and
     // transform the data into the module stores, then initialise the UI exactly
     // as before. On failure the user sees an explicit error and can Retry -
     // there is deliberately no silent fallback to hardcoded data.
+    // Phase 2E: the session is restored (GET /api/auth/me, then the account's
+    // saved offers) BEFORE the boot overlay clears, so the first click on the
+    // landing page already knows whether the visitor is signed in.
     this.showBootLoading();
     this.loadBootData()
+      .then(() => this.restoreSession())
       .then(() => {
         this.hideBootOverlay();
         this.booted();
@@ -674,17 +689,11 @@ window.app = {
     setTimeout(() => el.remove(), 3600);
   },
 
-  // Load persisted demo state; on first run, seed bookmarked offers so the
-  // Saved Results view is never blank when a judge opens it.
+  // Load persisted demo state. Phase 2E: saved offers are ACCOUNT data loaded
+  // from GET /api/saved-offers by restoreSession()/setAuthenticatedUser(); they
+  // are never seeded or cached in localStorage, so a guest never inherits
+  // somebody else's list and no fake saved offer exists without a real account.
   loadDemoState() {
-    const stored = db.get('savedOffers', null);
-    if (Array.isArray(stored)) {
-      appState.savedOffers = stored;
-    } else {
-      appState.savedOffers = BANK_OFFERS.filter(o => o.id === 'sbi-home' || o.id === 'hdfc-pers');
-      db.set('savedOffers', appState.savedOffers);
-      db.set('meta', { demoSeeded: true, seededAt: Date.now() });
-    }
     const savedP2P = db.get('savedP2PRequests', null);
     if (Array.isArray(savedP2P)) {
       appState.savedP2PRequests = savedP2P;
@@ -692,6 +701,119 @@ window.app = {
       appState.savedP2PRequests = [];
       db.set('savedP2PRequests', appState.savedP2PRequests);
     }
+  },
+
+  // ---- Phase 2E session -----------------------------------------------------
+  // Restores the session cookie on every page load. Runs inside the boot
+  // sequence, before the overlay clears, so the UI never shows a signed-out
+  // state to a visitor who still has a valid session (and vice versa).
+  async restoreSession() {
+    let user = null;
+    try {
+      user = await window.LoanFinderAPI.me();
+    } catch (e) {
+      // The catalogue already loaded, so this is an auth-specific failure:
+      // degrade to guest rather than blocking the whole app.
+      console.warn('[LoanFinder] session check failed:', e && e.message ? e.message : e);
+    }
+    appState.currentUser = user ? { id: user.id, email: user.email } : null;
+    this.applyAuthUi();
+    if (appState.currentUser) {
+      try {
+        await this.loadSavedOffersFromApi();
+      } catch (e) {
+        toast('Could not load your saved offers: ' + (e && e.message ? e.message : e), 'error');
+      }
+    }
+    return !!appState.currentUser;
+  },
+
+  // Safe display identity for the signed-in account, derived from the email
+  // the server returned (the API never exposes anything else). Guests get an
+  // honest "Guest" - the old hardcoded prototype identity is gone.
+  identityDisplayName() {
+    const user = appState.currentUser;
+    if (!user || !user.email) return 'Guest';
+    return user.email.split('@')[0] || 'Guest';
+  },
+
+  identityInitials() {
+    const user = appState.currentUser;
+    if (!user || !user.email) return 'G';
+    return (user.email.split('@')[0] || 'g').slice(0, 2).toUpperCase();
+  },
+
+  // Applies the current account (or guest) to every identity surface: the
+  // sidebar footer, the topbar and the profile card. The real signed-in user's
+  // safe identity (email-derived) replaces the old hardcoded prototype user,
+  // and a guest is shown as a guest - never as a fake signed-in person.
+  applyAuthUi() {
+    const user = appState.currentUser;
+    const email = user ? user.email : '';
+    const name = this.identityDisplayName();
+    const initials = this.identityInitials();
+
+    const setText = (sel, value) => {
+      const el = document.querySelector(sel);
+      if (el) el.textContent = value;
+    };
+    setText('.sidebar-footer .user-name', user ? name : 'Guest');
+    setText('.sidebar-footer .user-email', user ? email : 'Not signed in');
+    setText('.sidebar-footer .avatar', user ? initials : 'G');
+    setText('.topbar-user-name', user ? name : 'Guest');
+    setText('.topbar-avatar', user ? initials : 'G');
+
+    const profileName = document.getElementById('profile-full-name');
+    if (profileName) profileName.value = user ? name : '';
+    const profileEmail = document.getElementById('profile-email');
+    if (profileEmail) profileEmail.value = user ? email : '';
+    setText('#profile-heading', user ? name : 'Guest');
+    setText('#profile-avatar', user ? initials : 'G');
+    setText('#profile-member-line', user
+      ? 'Signed in \u2022 Password-protected account'
+      : 'Not signed in \u2022 Browsing as a guest');
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.title = user ? 'Log Out' : 'Sign In';
+      logoutBtn.setAttribute('aria-label', user ? 'Log Out' : 'Sign In');
+    }
+  },
+
+  // Promote the app to an authenticated session: store the safe identity,
+  // refresh the identity surfaces and pull the account's saved offers from the
+  // API (source of truth). Used by register, login and session restore.
+  async setAuthenticatedUser(user) {
+    appState.currentUser = { id: user.id, email: user.email };
+    this.applyAuthUi();
+    await this.loadSavedOffersFromApi();
+  },
+
+  // Drop to guest state: no identity, no saved offers, nothing that could be
+  // mistaken for a signed-in account.
+  setGuestUser() {
+    appState.currentUser = null;
+    appState.savedOffers = [];
+    appState.savedOfferRowIds = {};
+    this.applyAuthUi();
+  },
+
+  // Loads the signed-in user's saved offers from the database/API and maps the
+  // saved_offers rows onto the loaded catalogue offers for rendering.
+  async loadSavedOffersFromApi() {
+    const rows = await window.LoanFinderAPI.getSavedOffers();
+    const rowIds = {};
+    const offers = [];
+    (Array.isArray(rows) ? rows : []).forEach(row => {
+      rowIds[row.offer_id] = row.id;
+      const offer = BANK_OFFERS.find(o => o.id === row.offer_id);
+      if (offer) offers.push(offer);
+    });
+    appState.savedOffers = offers;
+    appState.savedOfferRowIds = rowIds;
+    this.renderSavedView();
+    this.calculateAndCompare();
+    return offers;
   },
 
   // ---- Settings preferences (persisted to localStorage via the db store) ----
@@ -794,6 +916,12 @@ window.app = {
   },
 
   showAuth() {
+    // A visitor with a valid session (restored at boot by restoreSession)
+    // goes straight into the app - the sign-in screen is only for guests.
+    if (appState.currentUser) {
+      this.launchApp();
+      return;
+    }
     const landing = document.getElementById('landing');
     const app = document.getElementById('app');
     const auth = document.getElementById('auth-page');
@@ -3306,16 +3434,49 @@ window.app = {
       });
     }
 
-    // Logout button
+    // Logout button: ends the real session on the server (POST /api/auth/logout)
+    // and drops the UI back to the sign-in screen with a guest identity. For a
+    // guest the same button is the way back to the sign-in screen.
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        appState.savedOffers = [];
-        this.showAuth();
-      });
+      logoutBtn.addEventListener('click', () => this.handleLogout());
     }
 
     this.bindGlobalDismiss();
+  },
+
+  async handleLogout() {
+    if (!appState.currentUser) {
+      this.showAuth();
+      return;
+    }
+    try {
+      await window.LoanFinderAPI.logout();
+    } catch (e) {
+      // The server could not be reached: still drop the local session state so
+      // the UI never keeps showing an identity the server no longer honours.
+      console.warn('[LoanFinder] logout request failed:', e && e.message ? e.message : e);
+    }
+    this.setGuestUser();
+    this.renderSavedView();
+    this.calculateAndCompare();
+    this.showAuth();
+    toast('You have been signed out.', 'info');
+  },
+
+  // The auth page's "Continue as guest": public LoanFinder functionality
+  // (browsing, matching, branches, maps) stays usable without an account.
+  // Guests simply cannot create saved offers.
+  continueAsGuest() {
+    if (appState.currentUser) {
+      this.launchApp();
+      return;
+    }
+    this.setGuestUser();
+    this.renderSavedView();
+    this.calculateAndCompare();
+    this.launchApp();
+    toast('Browsing as a guest. Sign in anytime to save offers to your account.', 'info');
   },
 
   // Open/close the off-canvas mobile sidebar together with its scrim, so the
@@ -3378,20 +3539,57 @@ window.app = {
   },
 
   // 7. Saved Offers & Bookmarking
-  toggleSaveOffer(offerId) {
+  // Phase 2E: saving is account data. The toggle goes through the authenticated
+  // API (POST/DELETE /api/saved-offers) and the UI only updates once the server
+  // has confirmed, so what you see is what the database holds. A guest is told
+  // to sign in - nothing is written anywhere for them.
+  async toggleSaveOffer(offerId) {
     const offer = BANK_OFFERS.find(o => o.id === offerId);
     if (!offer) return;
 
-    const idx = appState.savedOffers.findIndex(o => o.id === offerId);
-    if (idx > -1) {
-      appState.savedOffers.splice(idx, 1);
-      toast(`${offer.bankName} removed from saved offers.`, 'info');
-    } else {
-      appState.savedOffers.push(offer);
-      toast(`${offer.bankName} (${offer.interestRate}% p.a.) saved successfully!`, 'success');
+    if (!appState.currentUser) {
+      toast('Sign in to save offers \u2014 saved offers are stored in your account, not in this browser.', 'info');
+      return;
     }
 
-    db.set('savedOffers', appState.savedOffers);
+    const isSaved = appState.savedOffers.some(o => o.id === offerId);
+    try {
+      if (isSaved) {
+        const rowId = appState.savedOfferRowIds[offerId];
+        if (rowId === undefined) {
+          // State is out of sync with the server; rebuild it from the API.
+          await this.loadSavedOffersFromApi();
+          return;
+        }
+        await window.LoanFinderAPI.removeSavedOffer(rowId);
+        appState.savedOffers = appState.savedOffers.filter(o => o.id !== offerId);
+        delete appState.savedOfferRowIds[offerId];
+        toast(`${offer.bankName} removed from saved offers.`, 'info');
+      } else {
+        const row = await window.LoanFinderAPI.saveOffer(offerId);
+        appState.savedOfferRowIds[offerId] = row.id;
+        appState.savedOffers.unshift(offer);
+        toast(`${offer.bankName} (${offer.interestRate}% p.a.) saved successfully!`, 'success');
+      }
+    } catch (e) {
+      const status = e && e.status;
+      if (status === 409) {
+        // Already saved on the server (another tab, say): adopt its state.
+        await this.loadSavedOffersFromApi();
+        return;
+      }
+      if (status === 401) {
+        this.setGuestUser();
+        this.renderSavedView();
+        this.calculateAndCompare();
+        toast('Your session has expired. Please sign in again.', 'error');
+        this.showAuth();
+        return;
+      }
+      toast((e && e.message) ? e.message : 'Could not update your saved offers.', 'error');
+      return;
+    }
+
     this.renderSavedView();
     this.calculateAndCompare();
   },
@@ -3401,11 +3599,14 @@ window.app = {
     if (!container) return;
 
     if (appState.savedOffers.length === 0) {
+      const guest = !appState.currentUser;
       container.innerHTML = `
         <div class="p-8 text-center text-slate-500 col-span-2">
           <i data-lucide="bookmark" class="w-12 h-12 mx-auto mb-2 text-slate-300"></i>
-          <h4 class="font-bold text-slate-700">No Saved Bank Offers</h4>
-          <p class="text-sm">Click the bookmark icon on any loan card to save it here for later.</p>
+          <h4 class="font-bold text-slate-700">${guest ? 'Sign In To Save Offers' : 'No Saved Bank Offers'}</h4>
+          <p class="text-sm">${guest
+            ? 'Saved offers are stored in your account. Sign in, then click the bookmark icon on any loan card.'
+            : 'Click the bookmark icon on any loan card to save it here for later.'}</p>
         </div>
       `;
     } else {
@@ -3763,8 +3964,8 @@ window.app = {
 
     const request = {
       id: 'p2p-u' + Date.now(),
-      borrowerName: 'Alex Johnson',
-      initials: 'AJ',
+      borrowerName: this.identityDisplayName(),
+      initials: this.identityInitials(),
       avatarColor: '#2563eb',
       purpose,
       amount,
@@ -4759,8 +4960,11 @@ window.app = {
     }
   },
 
-  // Prototype sign-in. Validates the form in the browser only - there is no
-  // server, so nothing is transmitted and no credential is stored.
+  // Phase 2E: the sign-in / sign-up forms talk to the real authentication API.
+  // The browser validates first, then POSTs to /api/auth/login or
+  // /api/auth/register; the session cookie the server sets is what keeps the
+  // visitor authenticated across reloads. Failures (bad credentials, duplicate
+  // email) are surfaced exactly as the server reports them.
   activeAuthTab() {
     const signupTab = document.getElementById('auth-tab-signup');
     if (signupTab && signupTab.classList.contains('active')) return 'signup';
@@ -4769,22 +4973,24 @@ window.app = {
     return 'login';
   },
 
-  handleAuthSuccess() {
+  async handleAuthSuccess() {
     const isLogin = this.activeAuthTab() === 'login';
     const problems = [];
     let name = 'there';
+    let email = '';
+    let pass = '';
 
     if (isLogin) {
-      const email = (document.getElementById('login-email').value || '').trim();
-      const pass = document.getElementById('login-password').value || '';
+      email = (document.getElementById('login-email').value || '').trim();
+      pass = document.getElementById('login-password').value || '';
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) problems.push('Enter a valid email address');
       if (pass.length < 8) problems.push('Password must be at least 8 characters');
       name = email.split('@')[0] || name;
     } else {
       const first = (document.getElementById('signup-first').value || '').trim();
       const last = (document.getElementById('signup-last').value || '').trim();
-      const email = (document.getElementById('signup-email').value || '').trim();
-      const pass = document.getElementById('signup-password').value || '';
+      email = (document.getElementById('signup-email').value || '').trim();
+      pass = document.getElementById('signup-password').value || '';
       if (first.length < 2) problems.push('Enter your first name');
       if (last.length < 2) problems.push('Enter your last name');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) problems.push('Enter a valid email address');
@@ -4798,8 +5004,26 @@ window.app = {
       return;
     }
 
-    this.launchApp();
-    toast('Welcome, ' + name + '! This prototype runs entirely in your browser - no credentials were sent or stored.');
+    const form = isLogin
+      ? document.getElementById('auth-login-form')
+      : document.getElementById('auth-signup-form');
+    const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const user = isLogin
+        ? await window.LoanFinderAPI.login(email, pass)
+        : await window.LoanFinderAPI.register(email, pass);
+      await this.setAuthenticatedUser(user);
+      this.launchApp();
+      toast(isLogin
+        ? 'Welcome back, ' + name + '! You are signed in as ' + user.email + '.'
+        : 'Welcome, ' + name + '! Your LoanFinder account is ready.');
+    } catch (err) {
+      toast((err && err.message) ? err.message : 'Sign-in failed. Please try again.', 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
   },
 };
 
