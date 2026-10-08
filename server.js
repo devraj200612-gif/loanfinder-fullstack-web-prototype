@@ -1,14 +1,16 @@
 // LoanFinder API - Phase 2A/2C/2D backend.
 // Phase 2E adds auth + saved offers (read-only original data routes remain intact).
+// Phase 2G hardening: security headers, auth rate limiting, honest 4xx error
+// handling for malformed/oversized request bodies, no undeclared dependencies.
 'use strict';
 
 const path = require('path');
 const express = require('express');
-const cookieParser = require('cookie-parser');
 
 const apiRouter = require('./src/routes/api');
 const authRouter = require('./src/routes/auth');
 const savedOffersRouter = require('./src/routes/saved-offers');
+const { createRateLimiter } = require('./src/rate-limit');
 
 const ROOT = __dirname;
 const DEFAULT_PORT = 8080;
@@ -16,9 +18,30 @@ const DEFAULT_PORT = 8080;
 const app = express();
 app.disable('x-powered-by');
 
-app.use(cookieParser());
+// Security headers for every response. HSTS is production-only because dev
+// and the test suite run over plain http.
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  }
+  next();
+});
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+function positiveInt(value, fallback) {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
+}
+
+// Brute-force protection for the credential endpoints (POSTs only).
+const authRateLimiter = createRateLimiter({
+  windowMs: 60_000,
+  max: positiveInt(process.env.AUTH_RATE_LIMIT_MAX, 10),
+});
 
 // Health
 app.get('/api/health', (req, res) => {
@@ -26,6 +49,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Auth
+app.use('/api/auth', authRateLimiter);
 app.use('/api/auth', authRouter);
 
 // Saved offers (auth-protected)
@@ -55,6 +79,14 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error('[LoanFinder API] error:', err && err.message ? err.message : err);
   if (res.headersSent) return next(err);
+  // body-parser failures carry status 400/413 and must not be reported as 500:
+  // a client sending broken JSON or an oversized body is a client error.
+  if (err && (err.type === 'entity.parse.failed' || err.status === 400 || err.statusCode === 400)) {
+    return res.status(400).json({ status: 400, error: 'Invalid JSON body' });
+  }
+  if (err && (err.type === 'entity.too.large' || err.status === 413 || err.statusCode === 413)) {
+    return res.status(413).json({ status: 413, error: 'Payload too large' });
+  }
   res.status(500).json({ status: 500, error: 'Internal Server Error' });
 });
 

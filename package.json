@@ -2,10 +2,13 @@
   "name": "loanfinder",
   "version": "1.0.0",
   "private": true,
-  "description": "Loan comparison, P2P lending and branch discovery prototype (static browser app)",
+  "description": "Loan comparison, P2P lending and branch discovery prototype (Express API + browser frontend)",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.js",
-    "pretest": "npm run db:init",
+    "pretest": "npm run db:init && npm run db:validate",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
@@ -21,11 +24,11 @@
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
-    "express": "^5.2.1",
-    "pdf-lib": "^1.17.1",
-    "pdfmake": "^0.3.11"
+    "express": "^5.2.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0"
+    "@playwright/test": "^1.63.0",
+    "pdf-lib": "^1.17.1",
+    "pdfmake": "^0.3.11"
   }
 }

@@ -47,7 +47,16 @@ function destroySession(req) {
   return info.changes > 0;
 }
 
+const CLEANUP_INTERVAL_MS = 15 * 60 * 1000;
+let lastCleanupAt = 0;
+
 function clearExpiredSessions() {
+  // Throttled: every session lookup already excludes expired rows via its
+  // expires_at check, so this cleanup only needs to reclaim rows periodically
+  // instead of issuing a write transaction on every authenticated request.
+  const now = Date.now();
+  if (now - lastCleanupAt < CLEANUP_INTERVAL_MS) return;
+  lastCleanupAt = now;
   const db = getDb();
   db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(new Date().toISOString());
 }

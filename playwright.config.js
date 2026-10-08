@@ -22,11 +22,16 @@ module.exports = defineConfig({
   ],
   outputDir: 'test-results',
   webServer: {
-    // `npm run pretest` (db:init) runs automatically before `npm test`, so the
-    // database is always rebuilt from the canonical dataset before the server
-    // starts. The base URL must stay in sync with tests/helpers.js (APP_URL).
+    // `npm run pretest` (db:init + db:validate) runs automatically before
+    // `npm test`, so the database is always rebuilt and checked from the
+    // canonical dataset before the server starts. The base URL must stay in
+    // sync with tests/helpers.js (APP_URL).
+    // AUTH_RATE_LIMIT_MAX is relaxed for the shared suite server so the many
+    // legitimate test logins never trip the auth limiter; the limiter's real
+    // behaviour is asserted against a dedicated server in api-auth.spec.js.
     command: 'node server.js',
     url: 'http://127.0.0.1:8080/api/health',
+    env: { ...process.env, AUTH_RATE_LIMIT_MAX: '100000' },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

@@ -34,7 +34,13 @@ router.post('/login', async (req, res, next) => {
     res.cookie(COOKIE_NAME, sess.token, sessionCookieOptions());
     res.json({ data: { user: sess.user } });
   } catch (e) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    // Only genuine credential failures are 401. Anything else (for example the
+    // database being unavailable) must surface as a server error instead of
+    // masquerading as a wrong password.
+    if (e && e.message === 'Invalid credentials') {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    next(e);
   }
 });
 
