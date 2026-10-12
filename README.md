@@ -23,6 +23,7 @@ A transparent loan-comparison and bank-discovery prototype for the Indian market
 
 ## 📑 Table of Contents
 
+- [Demo Login Credentials](#-demo-login-credentials)
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [Screenshots](#-screenshots)
@@ -37,6 +38,17 @@ A transparent loan-comparison and bank-discovery prototype for the Indian market
 - [Project Structure](#-project-structure)
 - [Prototype Limitations & Safety Disclaimer](#-prototype-limitations--safety-disclaimer)
 - [Future Improvements](#-future-improvements)
+
+---
+
+## 🔑 Demo Login Credentials
+
+Use these credentials to sign in to the local demo:
+
+- **Email:** `demo@loanfinder.in`
+- **Password:** `demo1234`
+
+> 🔒 This is a **demo login for local use only** at `http://localhost:8080`. The account exists solely to persist saved offers in the prototype — no real financial or personal data is involved.
 
 ---
 
@@ -275,6 +287,11 @@ npm start          # serve the API + frontend on http://localhost:8080
 ```
 
 Then open **<http://localhost:8080>**.
+
+**Email:** `demo@loanfinder.in`
+**Password:** `demo1234`
+
+> 🖥️ **`http://localhost:8080` is for local use only.** There is no hosted/live website for this prototype — you must run the server yourself on your own machine.
 
 > ⚠️ The frontend must be served by this server. Opening `index.html` directly over `file://` will not work, because the app loads its data from `/api`.
 
