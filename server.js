@@ -18,6 +18,11 @@ const DEFAULT_PORT = 8080;
 const app = express();
 app.disable('x-powered-by');
 
+// Trust proxy in production (Render's proxy configuration).
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Security headers for every response. HSTS is production-only because dev
 // and the test suite run over plain http.
 app.use((req, res, next) => {

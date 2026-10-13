@@ -1,21 +1,3 @@
-'use strict';
-
-// LoanFinder database initializer + seeder (Phase 2B, refreshed in Phase 2D,
-// made non-destructive in Phase 2E, body restored in Phase 2G).
-//
-// Behaviour:
-//   - Creates data/loanfinder.sqlite (parent dir created on demand).
-//   - Ensures schema exists via migrations (src/migrate.js) so existing tables
-//     (including users/sessions/saved_offers) are preserved.
-//   - Only drops/recreates the reference tables (banks, loan_offers, branches,
-//     hidden_charges, meta) to seed fresh canonical data. User-owned tables
-//     (users, sessions, saved_offers) are NEVER dropped and their data survives.
-//   - saved_offers rows referencing offers that are absent from the fresh seed
-//     are purged explicitly (they are true orphans once the offer is gone).
-//   - Writes a validation summary to stdout and exits non-zero on failure.
-//
-// The generated reference data is gitignored; this script is reproducible.
-
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
@@ -23,6 +5,8 @@ const Database = require('better-sqlite3');
 const { loadFrontendData } = require('./extract-app-data');
 const { normalize, checkSourceInvariants, sha256 } = require('./data-pipeline');
 const { runMigrations } = require('../src/migrate');
+const { hashPassword } = require('../src/auth/passwords');
+const { isValidEmail, normalizeEmail } = require('../src/auth/auth-service');
 
 const ROOT = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'data');
@@ -30,6 +14,18 @@ const DB_PATH = path.join(DATA_DIR, 'loanfinder.sqlite');
 
 const SCHEMA_VERSION = '2';
 const SEED_TOOL = 'scripts/init-db.js';
+
+// Demo account defaults (server-side only). Can be overridden by env vars.
+const DEFAULT_DEMO_EMAIL = 'demo@loanfinder.in';
+const DEFAULT_DEMO_PASSWORD = 'demo1234';
+
+function getDemoCreds() {
+  const envEmail = process.env.DEMO_EMAIL;
+  const envPassword = process.env.DEMO_PASSWORD;
+  const email = (typeof envEmail === 'string' && envEmail.trim()) ? envEmail.trim() : DEFAULT_DEMO_EMAIL;
+  const password = (typeof envPassword === 'string' && envPassword.length > 0) ? envPassword : DEFAULT_DEMO_PASSWORD;
+  return { email, password };
+}
 
 function buildReport(db) {
   const countBanks = db.prepare('SELECT COUNT(*) n FROM banks').get().n;
@@ -111,8 +107,6 @@ function seed(db, data) {
   const insertMeta = db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)');
 
   const store = db.transaction(() => {
-    // Reference tables only, children before parents. user-owned tables
-    // (users, sessions, saved_offers) are never touched here.
     db.exec('DELETE FROM hidden_charges');
     db.exec('DELETE FROM loan_offers');
     db.exec('DELETE FROM branches');
@@ -198,7 +192,24 @@ function assertParity(db, data) {
   }
 }
 
-function main() {
+async function ensureDemoUser(db) {
+  const creds = getDemoCreds();
+  const target = normalizeEmail(creds.email);
+  if (!target) return;
+  const exists = db.prepare('SELECT id, email FROM users WHERE email = ?').get(target);
+  if (exists) {
+    return;
+  }
+  if (!isValidEmail(target)) return;
+  if (typeof creds.password !== 'string' || creds.password.length < 8) return;
+  const hash = await hashPassword(creds.password);
+  db.prepare(`
+    INSERT INTO users (email, password_hash, created_at, updated_at)
+    VALUES (?, ?, datetime('now'), datetime('now'))
+  `).run(target, hash);
+}
+
+async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 
   console.log('Loading source data from the canonical dataset (data/loanfinder-data.json)...');
@@ -213,9 +224,6 @@ function main() {
   console.log('Running migrations (existing user data is preserved)...');
   runMigrations(db);
 
-  // Swap the reference tables only. FK enforcement is paused for the swap
-  // because saved_offers rows reference loan_offers ids that are deleted and
-  // re-inserted inside the transaction; orphans are purged right after.
   db.pragma('foreign_keys = OFF');
   try {
     console.log('Clearing and re-seeding reference tables (single transaction)...');
@@ -230,6 +238,8 @@ function main() {
   if (purged.changes > 0) {
     console.log(`Purged ${purged.changes} orphaned saved_offer row(s) whose offers no longer exist.`);
   }
+
+  await ensureDemoUser(db);
 
   const fkIssues = db.pragma('foreign_key_check');
   if (fkIssues.length > 0) {
@@ -246,10 +256,8 @@ function main() {
   console.log(JSON.stringify(report, null, 2));
 }
 
-try {
-  main();
-} catch (e) {
+main().catch((e) => {
   console.error('\nDATABASE INITIALIZATION FAILED:', e.message);
   console.error(e.stack);
   process.exit(1);
-}
+});
