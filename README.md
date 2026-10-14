@@ -288,13 +288,9 @@ npm start          # serve the API + frontend on http://localhost:8080
 
 Then open **<http://localhost:8080>**.
 
-**Email:** `demo@loanfinder.in`
-**Password:** `demo1234`
-
 > 🌐 **Live Demo:** https://loanfinder-fullstack-web-prototype.onrender.com
 >
-> 🖥️ **Local development:** Run `npm start` and open
-> `http://localhost:8080` in your browser.
+> **Email:** `demo@loanfinder.in` **Password:** `demo1234`
 
 > ⚠️ The frontend must be served by this server. Opening `index.html` directly over `file://` will not work, because the app loads its data from `/api`.
 
