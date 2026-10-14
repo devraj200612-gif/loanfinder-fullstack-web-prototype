@@ -275,19 +275,6 @@ npm run test:p2p
 
 ## 🚀 Installation & Local Setup
 
-**Requirements:** Node.js **≥ 20** and npm.
-
-```bash
-git clone <your-repo-url>
-cd <your-repo-name>
-
-npm install        # install runtime + test dependencies
-npm run db:init    # create & seed data/loanfinder.sqlite (non-destructive)
-npm start          # serve the API + frontend on http://localhost:8080
-```
-
-Then open **<http://localhost:8080>**.
-
 > 🌐 **Live Demo:** https://loanfinder-fullstack-web-prototype.onrender.com
 >
 > **Email:** `demo@loanfinder.in` **Password:** `demo1234`
