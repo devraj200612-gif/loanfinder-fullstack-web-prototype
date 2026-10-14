@@ -6,12 +6,6 @@
 
 A transparent loan-comparison and bank-discovery prototype for the Indian market, built with a framework-free frontend and a small Express + SQLite backend.
 
-## 🌐 Live Demo
-
-[**https://loanfinder-fullstack-web-prototype.onrender.com**](https://loanfinder-fullstack-web-prototype.onrender.com)
-
-> **Note:** This is a portfolio/demo prototype, not a real lending, KYC, or financial transaction service. The Render free service may sleep after inactivity. SQLite data may not persist across restarts or redeployments.
-
 [![Node](https://img.shields.io/badge/Node-%E2%89%A5%2020-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-5-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
 [![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)
@@ -297,7 +291,10 @@ Then open **<http://localhost:8080>**.
 **Email:** `demo@loanfinder.in`
 **Password:** `demo1234`
 
-> 🖥️ **`http://localhost:8080` is for local use only.** The hosted demo is available at https://loanfinder-fullstack-web-prototype.onrender.com. The deployed version is intended for demonstration; local development and testing should use http://localhost:8080.
+> 🌐 **Live Demo:** https://loanfinder-fullstack-web-prototype.onrender.com
+>
+> 🖥️ **Local development:** Run `npm start` and open
+> `http://localhost:8080` in your browser.
 
 > ⚠️ The frontend must be served by this server. Opening `index.html` directly over `file://` will not work, because the app loads its data from `/api`.
 
